@@ -1,0 +1,73 @@
+body {
+    font-family: 'Poppins', sans-serif; /* Applique la police Poppins à toute la page */
+}
+
+
+.login-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+form {
+    margin-top: 120px;
+    border: 1px solid black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 500px;
+    height: 688px;
+    justify-content: space-around;
+    padding: 20px 20px 70px;
+}
+
+.info-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 295px;
+    justify-content: space-between;
+    height: 250px;
+}
+
+form input {
+    width: 100%;
+    height: 40px;
+    border-radius: 5px;
+    padding: 15px 10px 15px 10px;
+    font-size: 24px;
+}
+
+form input::placeholder{
+    font-size: 24px;
+}
+
+h1 {
+    padding: 14px 24px 14px 24px;
+    width: 214px;
+    height: 64px;
+    background-color: orange;
+    color: white;
+    border-radius: 10px;
+    font-size: 24px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+form label {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+form button {
+    padding: 10px;
+    border-radius: 5px;
+    background-color: blue;
+    color: white;
+    margin-top: 30px;
+    font-weight: bold;
+    font-size: 24px;
+}
