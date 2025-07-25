@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Inscription</title>
+  <link rel="stylesheet" th:href="@{/css/login.css}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+<div class="login-box">
+  <form th:action="@{/register}" th:object="${request}" method="post">
+    <h1>Pay My Buddy</h1>
+    <div class="info-box">
+
+      <label for="userName"></label>
+      <input type="text" id="userName" th:field="*{userName}" required placeholder="Username"/>
+      <div th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}"></div>
+      <br/>
+
+      <label for="email"></label>
+      <input type="email" id="email" th:field="*{email}" required placeholder="Mail"/>
+      <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+      <br/>
+
+      <label for="password"></label>
+      <input type="password" id="password" th:field="*{password}" required placeholder="Mot de passe"/>
+      <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+      <br/>
+
+    </div>
+    <button type="submit">S'inscrire</button>
+    <p th:if="${error}" th:text="${error}" style="color:red;"></p>
+  </form>
+  <p><a th:href="@{/login}">Déjà inscrit ?</a></p>
+</div>
+</body>
+</html>
