@@ -68,6 +68,13 @@ public class GlobalExceptionHandler {
         return exception.getUrlName();
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(TransactionBusinessException.class)
+    public String handleTransactionBusinessException(TransactionBusinessException exception, Model model) {
+        createModel(exception, model, exception.getFormData());
+        return exception.getUrlName();
+    }
+
     //UTILITAIRES
     private void createModel(Exception exception, Model model, Object formData) {
         log.error(exception.getMessage());
