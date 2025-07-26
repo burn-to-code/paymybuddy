@@ -1,6 +1,7 @@
 package com.paymybuddy.service;
 
 import com.paymybuddy.exception.EmailConflictException;
+import com.paymybuddy.exception.EmailNotFoundException;
 import com.paymybuddy.exception.UsernameConflictException;
 import com.paymybuddy.model.DTO.RegisterRequest;
 import com.paymybuddy.model.User;
@@ -33,5 +34,15 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         userRepository.save(user);
+    }
+
+    @Override
+    public User getUserByMail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
+    }
+
+    @Override
+    public User getCurrentUserByEMail(String email, String urlName, Object formData) {
+        return userRepository.findByEmail(email).orElseThrow(() -> new EmailNotFoundException("Email introuvable", urlName, formData));
     }
 }
