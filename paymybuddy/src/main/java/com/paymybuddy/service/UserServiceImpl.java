@@ -6,10 +6,12 @@ import com.paymybuddy.exception.UsernameConflictException;
 import com.paymybuddy.model.DTO.RegisterRequest;
 import com.paymybuddy.model.User;
 import com.paymybuddy.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -20,6 +22,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void registerUser(RegisterRequest request) {
+        log.info("Création utilisateur avec email {}", request.getEmail());
+
         if(userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new EmailConflictException("Email déjà utilisé", "register", request);
         }
