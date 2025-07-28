@@ -29,7 +29,7 @@ public class SpringSecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .usernameParameter("email")
-                        .defaultSuccessUrl("/home", true)
+                        .defaultSuccessUrl("/transferer", true)
                         .permitAll()
                 ).build();
 
