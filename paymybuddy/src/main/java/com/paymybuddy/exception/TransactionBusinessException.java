@@ -3,7 +3,7 @@ package com.paymybuddy.exception;
 import lombok.Getter;
 
 @Getter
-public class TransactionBusinessException extends RuntimeException{
+public class TransactionBusinessException extends RuntimeException implements ExceptionWithUrlName{
     private final String urlName;
     private final Object formData;
 
