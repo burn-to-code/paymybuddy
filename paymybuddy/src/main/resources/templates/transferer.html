@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>transférer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/transferer.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <div class="div-form-center">
+        <form th:action="@{/transferer}" th:object="${request}" method="post" class="form-transfer">
+
+            <select id="userReceiverId" th:field="*{userReceiverId}" required>
+                <option value="0" disabled selected>Sélectionner un contact</option>
+                <option th:each="contact : ${contacts}"
+                        th:value="${contact.id}"
+                        th:text="${contact.username}">
+                </option>
+            </select>
+
+            <label>
+                <input class="description" type="text" name="description" th:field="*{description}" placeholder="Description">
+            </label>
+
+            <label>
+                <input class="amount" type="number" name="amount" th:field="*{amount}" placeholder="0€" required min="0.01" step="0.01">
+            </label>
+
+            <button type="submit">Payer</button>
+        </form>
+    </div>
+    <div th:if="${error}" class="error-message" style="color: red; margin-bottom: 10px;">
+        <p th:text="${error}"></p>
+    </div>
+    <div class="transactions-view">
+        <h2>Mes transactions</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Destinataire</th>
+                <th>Description</th>
+                <th>Montant</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="transaction : ${transactions}">
+                <td th:text="${transaction.receiverName}">Destinataire</td>
+                <td th:text="${transaction.description}">Description</td>
+                <td th:text="${transaction.amount} + ' €'">Montant</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+</body>
+</html>
