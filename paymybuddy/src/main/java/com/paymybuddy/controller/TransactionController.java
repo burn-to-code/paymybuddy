@@ -1,6 +1,7 @@
 package com.paymybuddy.controller;
 
 import com.paymybuddy.model.DTO.TransactionRequest;
+import com.paymybuddy.model.Transaction;
 import com.paymybuddy.model.User;
 import com.paymybuddy.service.TransactionService;
 import com.paymybuddy.service.UserService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
+import java.util.List;
 
 @Controller
 @RequestMapping("/transferer")
@@ -29,11 +31,13 @@ public class TransactionController {
     @GetMapping
     public String showTransactionPage(Model model, Principal principal) {
         TransactionRequest request = new TransactionRequest();
+        request.setUserReceiverId(0L);
         User currentUser = userService.getCurrentUserByEMail(principal.getName(), "transaction", request);
+        List<Transaction> transactions = transactionService.getTransactionByUserSender(currentUser);
 
         model.addAttribute("request", request);
         model.addAttribute("contacts", currentUser.getConnections());
-        model.addAttribute("transactions", transactionService.getTransactionByUserSender(currentUser));
+        model.addAttribute("transactions", transactionService.getTransactionDTOToShow(transactions));
 
         return "transferer";
     }
