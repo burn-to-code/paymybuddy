@@ -74,7 +74,10 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(TransactionBusinessException.class)
     public String handleTransactionBusinessException(TransactionBusinessException exception, Model model) {
-        createModel(exception, model, exception.getFormData());
+        model.addAttribute("error", exception.getMessage());
+        model.addAttribute("request", exception.getFormData());
+        model.addAttribute("transactions", exception.getTransactionList());
+        model.addAttribute("contacts", exception.getUsersConnections());
         return safeGetUrlName(exception);
     }
 

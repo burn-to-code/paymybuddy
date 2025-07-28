@@ -31,10 +31,11 @@
 
             <button type="submit">Payer</button>
         </form>
+        <div th:if="${error}" class="error-message" style="color: red; margin-bottom: 10px;">
+            <p th:text="${error}"></p>
+        </div>
     </div>
-    <div th:if="${error}" class="error-message" style="color: red; margin-bottom: 10px;">
-        <p th:text="${error}"></p>
-    </div>
+
     <div class="transactions-view">
         <h2>Mes transactions</h2>
         <table>

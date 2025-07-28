@@ -27,20 +27,24 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void saveNewTransaction(TransactionRequest transaction, User userSender) {
+        List<Transaction> transactions = getTransactionByUserSender(userSender);
+        User userConnections = userRepository.findByEmailWithConnections(userSender.getEmail()).orElseThrow(
+                () -> new RuntimeException("User not found")
+        );
         if(transaction.getUserReceiverId() == 0L) {
-            throw new TransactionBusinessException("Le destinataire est requis", "transferer", transaction);
+            throw new TransactionBusinessException("Le destinataire est requis", "transferer", transaction, getTransactionDTOToShow(transactions), userConnections.getConnections());
         }
 
         if(transaction.getAmount() == null) {
-            throw new TransactionBusinessException("Le montant est requis", "transferer", transaction);
+            throw new TransactionBusinessException("Le montant est requis", "transferer", transaction, getTransactionDTOToShow(transactions), userConnections.getConnections());
         }
 
         if(transaction.getUserReceiverId() == userSender.getId()) {
-            throw new TransactionBusinessException("Vous ne pouvez pas vous envoyer de l'argent à vous même", "transferer", transaction);
+            throw new TransactionBusinessException("Vous ne pouvez pas vous envoyer de l'argent à vous même", "transferer", transaction, getTransactionDTOToShow(transactions), userConnections.getConnections());
         }
 
         User userReceiver = userRepository.findById((transaction.getUserReceiverId()))
-                .orElseThrow(() -> new TransactionBusinessException("Le destinataire n'existe pas", "transferer", transaction));
+                .orElseThrow(() -> new TransactionBusinessException("Le destinataire n'existe pas", "transferer", transaction, getTransactionDTOToShow(transactions), userConnections.getConnections()));
 
         Transaction transactionObj = new Transaction();
         transactionObj.setSender(userSender);
