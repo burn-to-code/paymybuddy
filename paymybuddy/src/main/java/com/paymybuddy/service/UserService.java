@@ -7,7 +7,5 @@ public interface UserService {
 
     void registerUser(RegisterRequest request);
 
-    User getUserByMail(String email);
-
-    User getCurrentUserByEMail(String email, String urlName, Object formData);
+    User getCurrentUserById(Long userId);
 }
