@@ -10,10 +10,5 @@ public class LoginController {
     public String login() {
         return "login";
     }
-// JUSTE UN CONTROLLER TEST
-    @GetMapping("/home")
-    public String home() {
-        return "home";
-    }
 
 }

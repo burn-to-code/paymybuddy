@@ -6,7 +6,9 @@ import com.paymybuddy.model.User;
 import com.paymybuddy.service.TransactionService;
 import com.paymybuddy.service.UserService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -14,10 +16,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.security.Principal;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequestMapping("/transferer")
 public class TransactionController {
@@ -29,11 +31,22 @@ public class TransactionController {
     private UserService userService;
 
     @GetMapping
-    public String showTransactionPage(Model model, Principal principal) {
+    public String showTransactionPage(Model model) {
         TransactionRequest request = new TransactionRequest();
         request.setUserReceiverId(0L);
-        User currentUser = userService.getCurrentUserByEMail(principal.getName(), "transaction", request);
-        List<Transaction> transactions = transactionService.getTransactionByUserSender(currentUser);
+
+        final Long connectedUser = SecurityUtils.getConnectedUserId();
+        User currentUser;
+        List<Transaction> transactions;
+
+        try {
+            currentUser = userService.getCurrentUserById(connectedUser);
+            transactions = transactionService.getTransactionByUserSenderId(connectedUser);
+        } catch (Exception ex) {
+            log.error("Une erreur est survenu lors de la récupération de l'user courant ou de ses transactions", ex);
+            model.addAttribute("error", ex.getMessage());
+            return "redirect:/transferer";
+        }
 
         model.addAttribute("request", request);
         model.addAttribute("contacts", currentUser.getConnections());
@@ -46,10 +59,9 @@ public class TransactionController {
     public String processTransaction(
             @ModelAttribute("request") @Valid TransactionRequest request,
             BindingResult bindingResult,
-            Model model,
-            Principal principal) {
+            RedirectAttributes model) {
 
-        User currentUser = userService.getCurrentUserByEMail(principal.getName(), "transaction", request);
+        User connectedUser = SecurityUtils.getConnectedUser();
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("transactions", transactionService.getTransactionByUserSender(currentUser));
