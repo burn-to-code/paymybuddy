@@ -3,14 +3,9 @@ package com.paymybuddy.exception;
 import lombok.Getter;
 
 @Getter
-public class EmailConflictException extends RuntimeException implements ExceptionWithUrlName{
+public class EmailConflictException extends RuntimeException{
 
-    private final String urlName;
-    private final Object formData;
-
-    public EmailConflictException(String message, String urlName, Object formData) {
+    public EmailConflictException(String message) {
         super(message);
-        this.urlName = urlName;
-        this.formData = formData;
     }
 }

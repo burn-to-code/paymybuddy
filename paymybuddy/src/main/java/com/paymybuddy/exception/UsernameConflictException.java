@@ -3,13 +3,9 @@ package com.paymybuddy.exception;
 import lombok.Getter;
 
 @Getter
-public class UsernameConflictException extends RuntimeException implements ExceptionWithUrlName{
-    private final String urlName;
-    private final Object formData;
+public class UsernameConflictException extends RuntimeException{
 
-    public UsernameConflictException(String message, String urlName, Object formData) {
+    public UsernameConflictException(String message) {
         super(message);
-        this.urlName = urlName;
-        this.formData = formData;
     }
 }

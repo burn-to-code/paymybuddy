@@ -3,13 +3,9 @@ package com.paymybuddy.exception;
 import lombok.Getter;
 
 @Getter
-public class UsernameNotFoundException extends RuntimeException implements ExceptionWithUrlName{
-    private final String urlName;
-    private final Object formData;
+public class UsernameNotFoundException extends RuntimeException{
 
-    public UsernameNotFoundException(String message, String urlName, Object formData) {
+    public UsernameNotFoundException(String message) {
         super(message);
-        this.urlName = urlName;
-        this.formData = formData;
     }
 }
