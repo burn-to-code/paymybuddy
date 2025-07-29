@@ -11,6 +11,9 @@
     <div class="login-box">
         <form th:action="@{/login}" method="post">
             <h1>Pay My Buddy</h1>
+            <div th:if="success" style="color:green;" class="success-message">
+                <p th:text="${success}"></p>
+            </div>
             <div class="info-box">
                 <label for="email"></label>
                 <input type="email" id="email" name="email" required placeholder="Mail"/>
