@@ -13,7 +13,7 @@ public class TransactionRequest {
 
     private String description;
 
-    @NotNull(message = "amount is required")
-    @DecimalMin(value = "0.01", message = "amount must be positive")
+    @NotNull(message = "Une valeur est requise")
+    @DecimalMin(value = "0.01", message = "Le montant doit être positif")
     private BigDecimal amount;
 }
