@@ -1,8 +1,10 @@
 package com.paymybuddy.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -13,13 +15,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
 
     private String password;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
+
+    @NotNull
+    @Column(nullable = false)
+    private BigDecimal account = BigDecimal.ZERO;
 
     @ManyToMany
     @JoinTable(name = "user_connections",
