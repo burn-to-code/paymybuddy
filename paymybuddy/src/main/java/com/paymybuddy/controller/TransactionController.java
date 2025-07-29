@@ -3,6 +3,7 @@ package com.paymybuddy.controller;
 import com.paymybuddy.model.DTO.TransactionRequest;
 import com.paymybuddy.model.Transaction;
 import com.paymybuddy.model.User;
+import com.paymybuddy.service.SecurityUtils;
 import com.paymybuddy.service.TransactionService;
 import com.paymybuddy.service.UserService;
 import jakarta.validation.Valid;
@@ -24,11 +25,14 @@ import java.util.List;
 @RequestMapping("/transferer")
 public class TransactionController {
 
-    @Autowired
-    private TransactionService transactionService;
+    private final TransactionService transactionService;
+    private final UserService userService;
 
     @Autowired
-    private UserService userService;
+    public TransactionController(TransactionService transactionService, UserService userService) {
+        this.transactionService = transactionService;
+        this.userService = userService;
+    }
 
     @GetMapping
     public String showTransactionPage(Model model) {
@@ -64,11 +68,20 @@ public class TransactionController {
         User connectedUser = SecurityUtils.getConnectedUser();
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("transactions", transactionService.getTransactionByUserSender(currentUser));
-            return "transferer";
+            List<String> errors = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .toList();
+            model.addFlashAttribute("errors", errors);
+            return "redirect:/transferer";
         }
 
-        transactionService.saveNewTransaction(request, currentUser);
+        try {
+            transactionService.saveNewTransaction(request, connectedUser);
+        }catch (Exception ex){
+            log.error("Erreur lors de la sauvegarde de la transaction", ex);
+            model.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/transferer";
+        }
 
         return "redirect:/transferer";
     }

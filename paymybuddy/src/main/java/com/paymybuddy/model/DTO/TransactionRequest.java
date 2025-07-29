@@ -8,8 +8,8 @@ import java.math.BigDecimal;
 
 @Data
 public class TransactionRequest {
-    @NotNull(message = "receiver is required")
-    private long userReceiverId;
+    @NotNull(message = "Vous devez ajouter un destinataire")
+    private Long userReceiverId;
 
     private String description;
 

@@ -2,63 +2,61 @@ package com.paymybuddy.service;
 
 import com.paymybuddy.exception.TransactionBusinessException;
 import com.paymybuddy.model.DTO.TransactionRequest;
-import com.paymybuddy.model.DTO.TransactionShowDTO;
+import com.paymybuddy.model.DTO.ResponseTransactionDTO;
 import com.paymybuddy.model.Transaction;
 import com.paymybuddy.model.User;
 import com.paymybuddy.repository.TransactionRepository;
 import com.paymybuddy.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class TransactionServiceImpl implements TransactionService {
 
-    @Autowired
-    private TransactionRepository transactionRepository;
-    @Autowired
-    private UserRepository userRepository;
+    private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public List<Transaction> getTransactionByUserSender(User user) {
-        return transactionRepository.findBySender(user);
+    public List<Transaction> getTransactionByUserSenderId(Long userId) {
+        log.info("Récupération des transactions de l'utilisateur avec l'id {}", userId);
+        return transactionRepository.findBySender_Id(userId);
     }
 
     @Override
     public void saveNewTransaction(TransactionRequest transaction, User userSender) {
-        List<Transaction> transactions = getTransactionByUserSender(userSender);
-        User userConnections = userRepository.findByEmailWithConnections(userSender.getEmail()).orElseThrow(
-                () -> new RuntimeException("User not found")
-        );
-        if(transaction.getUserReceiverId() == 0L) {
-            throw new TransactionBusinessException("Le destinataire est requis", "transferer", transaction, getTransactionDTOToShow(transactions), userConnections.getConnections());
+        log.info("Tentative de sauvegarde d'une nouvelle transaction. UserSender: {}, Transaction: {}", userSender, transaction);
+
+        if(transaction.getUserReceiverId() == null) {
+            throw new TransactionBusinessException("Le destinataire est requis");
+        } else if (transaction.getAmount() == null) {
+            throw new TransactionBusinessException("Le montant est requis");
+        } else if (transaction.getUserReceiverId().equals(userSender.getId())) {
+            throw new TransactionBusinessException("Vous ne pouvez pas vous envoyer de l'argent à vous même");
         }
 
-        if(transaction.getAmount() == null) {
-            throw new TransactionBusinessException("Le montant est requis", "transferer", transaction, getTransactionDTOToShow(transactions), userConnections.getConnections());
-        }
+        log.info("Transaction valide");
 
-        if(transaction.getUserReceiverId() == userSender.getId()) {
-            throw new TransactionBusinessException("Vous ne pouvez pas vous envoyer de l'argent à vous même", "transferer", transaction, getTransactionDTOToShow(transactions), userConnections.getConnections());
-        }
-
+        log.info("Tentative de récupération de l'utilisateur receveur avec l'id {}", transaction.getUserReceiverId());
         User userReceiver = userRepository.findById((transaction.getUserReceiverId()))
-                .orElseThrow(() -> new TransactionBusinessException("Le destinataire n'existe pas", "transferer", transaction, getTransactionDTOToShow(transactions), userConnections.getConnections()));
+                .orElseThrow(() -> new TransactionBusinessException("Le destinataire n'existe pas"));
 
-        Transaction transactionObj = new Transaction();
-        transactionObj.setSender(userSender);
-        transactionObj.setReceiver(userReceiver);
-        transactionObj.setDescription(transaction.getDescription());
-        transactionObj.setAmount(transaction.getAmount());
+        Transaction transactionObj = new Transaction(transaction.getDescription(),
+                transaction.getAmount(),
+                userSender,
+                userReceiver);
 
         transactionRepository.save(transactionObj);
     }
 
     @Override
-    public List<TransactionShowDTO> getTransactionDTOToShow(List<Transaction> transactions) {
+    public List<ResponseTransactionDTO> getTransactionDTOToShow(List<Transaction> transactions) {
         return transactions.stream()
-                .map(t -> new TransactionShowDTO(
+                .map(t -> new ResponseTransactionDTO(
                         t.getReceiver().getUsername(),
                         t.getDescription(),
                         t.getAmount()
