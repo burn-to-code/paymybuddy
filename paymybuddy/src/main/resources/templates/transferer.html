@@ -31,6 +31,12 @@
 
             <button type="submit">Payer</button>
         </form>
+        <div th:if="${errors}" class="error-message" style="color: red; margin-bottom: 10px;">
+            <ul th:if="${#lists.size(errors) > 1}">
+                <li th:each="err : ${errors}" th:text="${err}"></li>
+            </ul>
+            <p th:if="${#lists.size(errors) == 1}" th:text="${errors[0]}"></p>
+        </div>
         <div th:if="${error}" class="error-message" style="color: red; margin-bottom: 10px;">
             <p th:text="${error}"></p>
         </div>
