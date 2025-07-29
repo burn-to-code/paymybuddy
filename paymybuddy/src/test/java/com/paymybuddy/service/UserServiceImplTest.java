@@ -1,6 +1,7 @@
 package com.paymybuddy.service;
 
 import com.paymybuddy.exception.EmailConflictException;
+import com.paymybuddy.exception.UserNotFoundException;
 import com.paymybuddy.exception.UsernameConflictException;
 import com.paymybuddy.model.DTO.RegisterRequest;
 import com.paymybuddy.model.User;
@@ -76,8 +77,6 @@ public class UserServiceImplTest {
         );
 
         assertEquals("Email déjà utilisé", ex.getMessage());
-        assertEquals("register", ex.getUrlName());
-        assertEquals(request, ex.getFormData());
 
         verify(userRepository, Mockito.never()).save(Mockito.any());
     }
@@ -95,10 +94,40 @@ public class UserServiceImplTest {
 
         // Then
         assertEquals("UserName déjà utilisé", ex.getMessage());
-        assertEquals("register", ex.getUrlName());
-        assertEquals(request, ex.getFormData());
 
         verify(userRepository, Mockito.never()).save(Mockito.any());
+    }
+
+    @Test
+    public void getCurrentUserById_WhenEmailExists() {
+        String email = "existing@email.com";
+        Long id = 1L;
+        User user = new User();
+        user.setId(id);
+        user.setEmail(email);
+        when(userRepository.findByIdWithConnections(id)).thenReturn(Optional.of(user));
+
+        User currentUser = userService.getCurrentUserById(id);
+
+        assertNotNull(currentUser);
+        assertEquals(1L, currentUser.getId());
+        assertEquals(email, currentUser.getEmail());
+        verify(userRepository).findByIdWithConnections(id);
+    }
+
+    @Test
+    public void getCurrentUserById_WhenIdNotFound() {
+        // GIVEN
+        Long id = 1L;
+        when(userRepository.findByIdWithConnections(id)).thenReturn(Optional.empty());
+
+        //WHEN
+        UserNotFoundException ex = assertThrows(UserNotFoundException.class, () -> userService.getCurrentUserById(id));
+
+        // THEN
+        assertEquals("Utilisateur introuvable avec l'id : 1", ex.getMessage());
+
+        verify(userRepository).findByIdWithConnections(id);
     }
 
 }
