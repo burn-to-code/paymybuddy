@@ -10,6 +10,17 @@ import java.math.BigDecimal;
 @Table(name = "transactions")
 @Data
 public class Transaction {
+
+    public Transaction() {
+    }
+
+    public Transaction(String description, BigDecimal amount, User sender, User receiver) {
+        this.description = description;
+        this.amount = amount;
+        this.sender = sender;
+        this.receiver = receiver;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
