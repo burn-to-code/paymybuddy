@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ajouter une relation</title>
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/ajouter-relation.css}">
+</head>
+<body>
+
+  <div th:replace="~{fragments/header :: header}"></div>
+
+  <div class="form-add-relation">
+    <form th:action="@{/ajouter-relation}" method="post" class="form-relation">
+
+      <div class="input-container">
+        <label for="email">Chercher une relation</label>
+        <input id="email" class="email" type="email" name="email" th:value="${email}" placeholder="Saisir une adresse mail" required>
+      </div>
+
+      <button type="submit">Ajouter</button>
+    </form>
+      <div th:if="${error}" th:text="${error}" class="error"></div>
+      <div th:if="${success}" th:text="${success}" class="success"></div>
+  </div>
+
+</body>
+</html>

@@ -8,4 +8,6 @@ public interface UserService {
     void registerUser(RegisterRequest request);
 
     User getCurrentUserById(Long userId);
+
+    void addUserConnexion(User userConnected, String emailOfAnotherUser);
 }

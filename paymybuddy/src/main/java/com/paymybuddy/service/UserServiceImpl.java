@@ -1,6 +1,7 @@
 package com.paymybuddy.service;
 
 import com.paymybuddy.exception.EmailConflictException;
+import com.paymybuddy.exception.EmailNotFoundException;
 import com.paymybuddy.exception.UserNotFoundException;
 import com.paymybuddy.exception.UsernameConflictException;
 import com.paymybuddy.model.DTO.RegisterRequest;
@@ -48,5 +49,35 @@ public class UserServiceImpl implements UserService {
         log.info("Récupération d'un utilisateur avec ses contacts avec l'id {}", userId);
         return userRepository.findByIdWithConnections(userId)
                  .orElseThrow(() -> new UserNotFoundException("Utilisateur introuvable avec l'id : " + userId));
+    }
+
+    @Override
+    @Transactional
+    public void addUserConnexion(User userConnected, String emailOfUserToConnect) {
+        if(emailOfUserToConnect == null) {
+            throw new EmailNotFoundException("L'email est requis");
+        }
+
+        if(userConnected.getEmail().equals(emailOfUserToConnect)) {
+            throw new IllegalArgumentException("Vous ne pouvez pas vous ajouter vous même comme amis");
+        }
+
+        log.info("Tentative de récupération de l'utilisateur avec l'email {} pour ajouter une connexion avec l'utilisateur {}", emailOfUserToConnect, userConnected.getEmail());
+        User userToConnect = userRepository.findByEmailWithConnections(emailOfUserToConnect)
+                .orElseThrow(() -> new EmailNotFoundException("L'utilisateur avec l'email " + emailOfUserToConnect + " n'existe pas"));
+
+        User userConnectedEntity = userRepository.findByIdWithConnections(userConnected.getId())
+                        .orElseThrow(() -> new UserNotFoundException("L'utilisateur avec l'id " + userConnected.getId() + " n'existe pas"));
+
+        if(userConnectedEntity.getConnections().contains(userToConnect)) {
+            throw new EmailConflictException("Cette personne fait déjà partie de vos contacts : " + emailOfUserToConnect + " (" + userToConnect.getUsername() + ")");
+        }
+
+        log.info("Ajout d'une connexion entre {} et {}", userConnected.getEmail(), emailOfUserToConnect);
+        userConnectedEntity.getConnections().add(userToConnect);
+        userToConnect.getConnections().add(userConnectedEntity);
+
+        userRepository.save(userConnectedEntity);
+        userRepository.save(userToConnect);
     }
 }
