@@ -117,5 +117,22 @@ table td:last-child {
     text-align: right;
 }
 
+.error, .error-message {
+    color: white;
+    font-size: 16px;
+    background-color: red;
+    padding: 10px 20px;
+    border-radius: 16px;
+}
+
+
+.success {
+    color: white;
+    font-size: 16px;
+    background-color: blue;
+    padding: 10px 20px;
+    border-radius: 16px;
+}
+
 
 

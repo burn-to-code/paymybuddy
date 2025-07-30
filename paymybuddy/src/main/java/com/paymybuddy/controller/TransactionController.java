@@ -83,6 +83,7 @@ public class TransactionController {
             return "redirect:/transferer";
         }
 
+        model.addFlashAttribute("success", "transation effectuée avec succès");
         return "redirect:/transferer";
     }
 }
