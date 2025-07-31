@@ -32,4 +32,7 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "connection_id"))
     private List<User> connections;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<AccountOperation> accountOperations;
 }
