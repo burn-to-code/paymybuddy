@@ -66,12 +66,12 @@ public class UserServiceImpl implements UserService {
         }
 
         if(userConnected.getEmail().equals(emailOfUserToConnect)) {
-            throw new IllegalArgumentException("Vous ne pouvez pas vous ajouter vous même comme amis");
+            throw new EmailConflictException("Vous ne pouvez pas vous ajouter vous même comme amis");
         }
 
         log.info("Tentative de récupération de l'utilisateur avec l'email {} pour ajouter une connexion avec l'utilisateur {}", emailOfUserToConnect, userConnected.getEmail());
         User userToConnect = userRepository.findByEmailWithConnections(emailOfUserToConnect)
-                .orElseThrow(() -> new EmailNotFoundException("L'utilisateur avec l'email " + emailOfUserToConnect + " n'existe pas"));
+                .orElseThrow(() -> new UserNotFoundException("L'utilisateur avec l'email " + emailOfUserToConnect + " n'existe pas"));
 
         User userConnectedEntity = userRepository.findByIdWithConnections(userConnected.getId())
                         .orElseThrow(() -> new UserNotFoundException("L'utilisateur avec l'id " + userConnected.getId() + " n'existe pas"));
@@ -92,7 +92,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateUser(UpdateUserRequest request, User user) {
         log.info("Début de tentative de mise à jour de l'utilisateur");
-        Assert.notNull(request, "request must not be null");
+        Assert.notNull(request, "La requête ne peut être null");
+        Assert.notNull(user, "L'utilisateur ne peut être null");
 
         String email = request.getEmail();
         String username = request.getUsername();
@@ -104,21 +105,28 @@ public class UserServiceImpl implements UserService {
         validateRequest(request);
         checkConflict(request, userConnected);
 
+        boolean isUpdate = false;
+
         if(!email.equals(userConnected.getEmail()) && !email.isBlank()){
             log.debug("Mise à jour email: {} → {}", userConnected.getEmail(), email);
             userConnected.setEmail(request.getEmail());
+            isUpdate = true;
         }
         if(!username.equals(userConnected.getUsername()) && !username.isBlank()){
             log.debug("Mise à jour username: {} → {}", userConnected.getUsername(), username);
             userConnected.setUsername(request.getUsername());
+            isUpdate = true;
         }
         if(!passwordEncoder.matches(password, userConnected.getPassword()) && !password.isBlank()){
             log.debug("Mise à jour mot de passe");
             userConnected.setPassword(passwordEncoder.encode(request.getPassword()));
+            isUpdate = true;
         }
 
-        userRepository.save(userConnected);
-        log.info("Mise à jour de l'utilisateur {} réussie", userConnected.getId());
+        if(isUpdate) {
+            userRepository.save(userConnected);
+            log.info("Mise à jour de l'utilisateur {} réussie", userConnected.getId());
+        }
     }
 
     private void validateRequest(UpdateUserRequest request) {
@@ -131,7 +139,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if(!email.isEmpty() && !EMAIL_REGEX.matcher(email).matches()){
-            throw new IllegalArgumentException("L'email n'est pas valide, la mis à jour n'est pas possible : " + request.getEmail() + " Veuillez en choisir un autre.");
+            throw new IllegalArgumentException("L'email n'est pas valide, la mis à jour n'est pas possible : " + request.getEmail() + " Veuillez écrire un mail au bon format.");
         }
 
         // Vérifier username n'est pas remplie d'espace
@@ -151,7 +159,7 @@ public class UserServiceImpl implements UserService {
 
         // Vérifie que le mail est bien différent de celle d'origine, puis regarde si elle existe en bdd
         if(!email.equals(userConnected.getEmail()) && userRepository.findByEmail(email).isPresent() ){
-            throw new EmailConflictException("L'email existe déjà : " + request.getUsername() + " Veuillez en choisir une autre.");
+            throw new EmailConflictException("L'email existe déjà : " + request.getEmail() + " Veuillez en choisir une autre.");
         }
 
         // Vérifie que la meme chose mais pour l'userName

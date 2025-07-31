@@ -19,8 +19,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,12 +56,13 @@ public class TransactionServiceImplTest {
     void saveNewTransaction_ShouldThrow_WhenAmountIsNull() {
         // Given
         User sender = createUser(1L, "sender@example.com", "Sender");
+        sender.setAccount(BigDecimal.valueOf(100.0));
         TransactionRequest request = createTransactionRequest(2L, null, "Test");
 
         // When & Then
         TransactionBusinessException ex = assertThrows(TransactionBusinessException.class,
                 () -> transactionService.saveNewTransaction(request, sender));
-        assertEquals("Le montant est requis", ex.getMessage());
+        assertEquals("Le montant ou le solde est nul", ex.getMessage());
 
         verify(transactionRepository, never()).save(any());
     }
@@ -87,6 +87,7 @@ public class TransactionServiceImplTest {
     void saveNewTransaction_ShouldThrow_WhenReceiverNotFound() {
         // Given
         User sender = createUser(1L, "sender@example.com", "Sender");
+        sender.setAccount(BigDecimal.valueOf(100.0));
         TransactionRequest request = createTransactionRequest(2L, BigDecimal.valueOf(50.0), "Test");
 
         when(userRepository.findById(2L)).thenReturn(Optional.empty());
@@ -104,11 +105,12 @@ public class TransactionServiceImplTest {
     void saveNewTransaction_ShouldSave_WhenValidRequest() {
         // Given
         User sender = createUser(1L, "sender@example.com", "Sender");
+        sender.setAccount(BigDecimal.valueOf(100.0));
         User receiver = createUser(2L, "receiver@example.com", "Receiver");
+        receiver.setAccount(BigDecimal.valueOf(100.0));
         TransactionRequest request = createTransactionRequest(2L, BigDecimal.valueOf(50.0), "Paiement");
 
         when(userRepository.findById(2L)).thenReturn(Optional.of(receiver));
-
         // When
         transactionService.saveNewTransaction(request, sender);
 
@@ -121,6 +123,43 @@ public class TransactionServiceImplTest {
         assertEquals(BigDecimal.valueOf(50.0), savedTransaction.getAmount());
         assertEquals(sender, savedTransaction.getSender());
         assertEquals(receiver, savedTransaction.getReceiver());
+
+
+        verify(userRepository).updateAccount(sender.getId(), BigDecimal.valueOf(50.0));   // 100 - 50
+        verify(userRepository).updateAccount(receiver.getId(), BigDecimal.valueOf(150.0)); // 100 + 50
+    }
+
+    @Test
+    void testSaveNewTransaction_shouldThrowException_whenAmountOrAccountIsNullOrZero() {
+        TransactionRequest request = createTransactionRequest(1L, null, "Sender");
+
+        User sender = createUser(3L, "sender@example.com", "Sender" );
+        sender.setAccount(null);
+
+        TransactionBusinessException exception = assertThrows(TransactionBusinessException.class, () ->
+                transactionService.saveNewTransaction(request, sender)
+        );
+
+        assertEquals("Le montant ou le solde est nul", exception.getMessage());
+    }
+
+    @Test
+    void testSaveNewTransaction_shouldThrowException_whenInsufficientFunds() {
+        TransactionRequest request = createTransactionRequest(1L, BigDecimal.valueOf(200), "Sender");
+
+        User sender = createUser(3L, "sender@example.com", "Sender" );
+        sender.setAccount(BigDecimal.valueOf(100));
+
+        User receiver = new User();
+        receiver.setEmail("receiver@example.com");
+
+        TransactionBusinessException exception = assertThrows(TransactionBusinessException.class, () ->
+                transactionService.saveNewTransaction(request, sender)
+        );
+
+        assertEquals("Solde insuffisant : " + sender.getAccount() + " € disponible, mais " + request.getAmount() + " € demandé.", exception.getMessage());
+        assertTrue(exception.getMessage().contains("100"));
+        assertTrue(exception.getMessage().contains("200"));
     }
 
     // ==== Groupe getTransactionByUserSenderId ====

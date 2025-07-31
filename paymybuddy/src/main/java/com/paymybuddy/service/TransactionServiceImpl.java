@@ -85,6 +85,9 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal newSenderAccount = sender.getAccount().subtract(amount);
         BigDecimal newReceiverAccount = receiver.getAccount().add(amount);
 
+        sender.setAccount(newSenderAccount);
+        receiver.setAccount(newReceiverAccount);
+
         userRepository.updateAccount(sender.getId(), newSenderAccount);
         userRepository.updateAccount(receiver.getId(), newReceiverAccount);
 
