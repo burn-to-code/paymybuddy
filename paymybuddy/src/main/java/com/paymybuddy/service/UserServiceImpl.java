@@ -4,6 +4,7 @@ import com.paymybuddy.exception.EmailConflictException;
 import com.paymybuddy.exception.EmailNotFoundException;
 import com.paymybuddy.exception.UserNotFoundException;
 import com.paymybuddy.exception.UsernameConflictException;
+import com.paymybuddy.model.AuthProvider;
 import com.paymybuddy.model.DTO.RegisterRequest;
 import com.paymybuddy.model.DTO.UpdateUserRequest;
 import com.paymybuddy.model.User;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -31,21 +33,37 @@ public class UserServiceImpl implements UserService {
     @Override
     public void registerUser(RegisterRequest request) {
         log.info("Création utilisateur avec email {}", request.getEmail());
+        Assert.notNull(request.getEmail(), "L'email est requis");
+        Assert.notNull(request.getUserName(), "Le nom d'utilisateur est requis");
+        Assert.notNull(request.getPassword(), "Le mot de passe est requis");
 
-        if(userRepository.findByEmail(request.getEmail()).isPresent()) {
-            log.warn("L'utilisateur avec l'email {}, existe déjà.", request.getEmail());
-            throw new EmailConflictException("Email déjà utilisé");
-        }
         if(userRepository.findByUsername(request.getUserName()).isPresent()) {
             log.warn("L'utilisateur avec le nom d'utilisateur {}, existe déjà", request.getUserName());
             throw new UsernameConflictException("UserName déjà utilisé");
         }
 
-        User user = new User();
+        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
 
+        if(userOpt.isPresent()) {
+            User existingUser = userOpt.get();
+            if(existingUser.getProvider() == AuthProvider.LOCAL){
+                log.warn("L'utilisateur avec l'email {}, existe déjà.", request.getEmail());
+                throw new EmailConflictException("Email déjà utilisé");
+            } else {
+                log.info("Un utilisateur existe avec cet email via OAuth. Ajout des identifiants locaux.");
+                existingUser.setUsername(request.getUserName());
+                existingUser.setPassword(passwordEncoder.encode(request.getPassword()));
+                existingUser.setProvider(AuthProvider.LOCAL);
+                userRepository.save(existingUser);
+                return;
+            }
+        }
+
+        User user = new User();
         user.setUsername(request.getUserName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setProvider(AuthProvider.LOCAL);
 
         userRepository.save(user);
     }
@@ -107,20 +125,39 @@ public class UserServiceImpl implements UserService {
 
         boolean isUpdate = false;
 
-        if(!email.equals(userConnected.getEmail()) && !email.isBlank()){
-            log.debug("Mise à jour email: {} → {}", userConnected.getEmail(), email);
-            userConnected.setEmail(request.getEmail());
-            isUpdate = true;
-        }
-        if(!username.equals(userConnected.getUsername()) && !username.isBlank()){
-            log.debug("Mise à jour username: {} → {}", userConnected.getUsername(), username);
-            userConnected.setUsername(request.getUsername());
-            isUpdate = true;
-        }
-        if(!passwordEncoder.matches(password, userConnected.getPassword()) && !password.isBlank()){
-            log.debug("Mise à jour mot de passe");
-            userConnected.setPassword(passwordEncoder.encode(request.getPassword()));
-            isUpdate = true;
+
+        if(userConnected.getProvider() == AuthProvider.LOCAL) {
+            // Utilisateur local : peut modifier email, username, password
+
+            if(!email.equals(userConnected.getEmail()) && !email.isBlank()) {
+                log.debug("Mise à jour email: {} → {}", userConnected.getEmail(), email);
+                userConnected.setEmail(email);
+                isUpdate = true;
+            }
+            if(!username.equals(userConnected.getUsername()) && !username.isBlank()) {
+                log.debug("Mise à jour username: {} → {}", userConnected.getUsername(), username);
+                userConnected.setUsername(username);
+                isUpdate = true;
+            }
+            if(password != null && !password.isBlank() && !passwordEncoder.matches(password, userConnected.getPassword())) {
+                log.debug("Mise à jour mot de passe");
+                userConnected.setPassword(passwordEncoder.encode(password));
+                isUpdate = true;
+            }
+        } else {
+            // Utilisateur OAuth : ne peut modifier que username
+
+            if(!email.equals(userConnected.getEmail()) && !email.isBlank()) {
+                throw new UnsupportedOperationException("Modification de l'email impossible pour un compte Google ou Facebook.");
+            }
+            if(password != null && !password.isBlank() && !passwordEncoder.matches(password, userConnected.getPassword())) {
+                throw new UnsupportedOperationException("Modification du mot de passe impossible pour un compte Google ou Facebook.");
+            }
+            if(!username.equals(userConnected.getUsername()) && !username.isBlank()) {
+                log.debug("Mise à jour username: {} → {}", userConnected.getUsername(), username);
+                userConnected.setUsername(username);
+                isUpdate = true;
+            }
         }
 
         if(isUpdate) {

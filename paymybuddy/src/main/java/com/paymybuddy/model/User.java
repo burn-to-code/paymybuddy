@@ -15,6 +15,11 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider")
+    private AuthProvider provider = AuthProvider.LOCAL;
+
     @Column(unique = true, nullable = false)
     private String username;
 

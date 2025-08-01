@@ -1,4 +1,4 @@
-package com.paymybuddy.config;
+package com.paymybuddy.security;
 
 import com.paymybuddy.model.User;
 import org.springframework.security.core.GrantedAuthority;
