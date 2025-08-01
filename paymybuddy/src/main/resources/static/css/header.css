@@ -14,11 +14,21 @@ header {
     padding: 0 50px;
 }
 
-header > h1 {
+header > a > h1 {
     flex: 0 0 30%;
     font-size: 24px;
     font-weight: normal;
     text-align: left;
+}
+
+header > a {
+    color: inherit;
+    text-decoration: none;
+    width: 30%
+}
+
+header > a:visited {
+    color: inherit;
 }
 
 header > nav {

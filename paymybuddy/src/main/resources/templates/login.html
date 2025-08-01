@@ -23,8 +23,18 @@
                 <br/>
             </div>
             <button type="submit">Se connecter</button>
-            <p th:if="${param.error}" style="color: red">Email ou mot de passe incorrect</p>
+
+            <div th:if="${param.error}" class="error">
+                <p th:if="${param.error}">Email ou mot de passe incorrect</p>
+                <p th:text="${param.error}">Erreur</p>
+            </div>
         </form>
+        <a th:href="@{/oauth2/authorization/google}">
+            <button class="google-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" class="google-icon" />
+                <span>Continuer avec Google</span>
+            </button>
+        </a>
         <p><a th:href="@{/register}">Pas encore inscrit ?</a></p>
     </div>
 </body>
