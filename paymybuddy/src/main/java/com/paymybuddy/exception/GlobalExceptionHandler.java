@@ -3,7 +3,6 @@ package com.paymybuddy.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindException;
 import org.springframework.http.HttpStatus;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,7 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // ERREUR GENERIQUE
+    // ERREUR Générique
     @ExceptionHandler(MissingServletRequestParameterException.class)
 //    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public void handleMissingParams(MissingServletRequestParameterException ex, RedirectAttributes model) {
