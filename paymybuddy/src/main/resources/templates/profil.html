@@ -9,42 +9,52 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Passer au contenu principal</a>
     <div th:replace="~{fragments/header :: header}"></div>
+    <main id="main-content" tabindex="-1">
+        <div class="div-form-center">
+            <form th:action="@{/profil/update}" th:object="${request}" method="post" class="form-profil">
+                <div class="input-container">
+                    <div class="input-label">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" th:field="*{username}" placeholder="@username">
+                        <i class="fa-solid fa-chevron-right" style="position: absolute; right: 51%;  transform: translateY(10%); color: black; font-size: 10px; pointer-events: none; opacity: 0.9;"></i>
+                    </div>
 
-    <div class="div-form-center">
-        <form th:action="@{/profil}" th:object="${request}" method="post" class="form-profil">
-            <div class="input-container">
-                <div class="input-label">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" th:field="*{username}" placeholder="@username">
-                    <i class="fa-solid fa-chevron-right" style="position: absolute; right: 51%;  transform: translateY(10%); color: black; font-size: 10px; pointer-events: none; opacity: 0.9;"></i>
+                    <div class="input-label">
+                        <label for="email">Mail</label>
+                        <input type="email" id="email" name="email" th:field="*{email}" placeholder="nom@domain.com">
+                        <i class="fa-solid fa-chevron-right" style="position: absolute; right: 45%;  transform: translateY(10%); color: black; font-size: 10px; pointer-events: none; opacity: 0.9;"></i>
+                    </div>
+
+                    <div class="input-label-with-button">
+                        <label for="password">Mot de passe</label>
+                        <input type="password" id="password" name="password" th:field="*{password}" placeholder="mot de passe">
+                        <i class="fa-solid fa-chevron-right" style="position: absolute; right: 45%;  transform: translateY(100%); color: black; font-size: 10px; pointer-events: none; opacity: 0.9;"></i>
+                        <button type="submit">Modifier</button>
+                    </div>
+                    <!--/*@thymesVar id="error" type="error"*/-->
+                    <div th:if="${error}" th:text="${error}" class="error"></div>
+                    <!--/*@thymesVar id="success" type="success"*/-->
+                    <div th:if="${success}" th:text="${success}" class="success"></div>
+                    <!--/*@thymesVar id="errors" type="errors"*/-->
+                    <div th:if="${errors}" class="error-message">
+                        <ul th:if="${#lists.size(errors) > 1}">
+                            <li th:each="err : ${errors}" th:text="${err}"></li>
+                        </ul>
+                        <p th:if="${#lists.size(errors) == 1}" th:text="${errors[0]}"></p>
+                    </div>
                 </div>
-
-                <div class="input-label">
-                    <label for="email">Mail</label>
-                    <input type="email" id="email" name="email" th:field="*{email}" placeholder="nom@domain.com">
-                    <i class="fa-solid fa-chevron-right" style="position: absolute; right: 45%;  transform: translateY(10%); color: black; font-size: 10px; pointer-events: none; opacity: 0.9;"></i>
-                </div>
-
-                <div class="input-label-with-button">
-                    <label for="password">Mot de passe</label>
-                    <input type="password" id="password" name="password" th:field="*{password}" placeholder="mot de passe">
-                    <i class="fa-solid fa-chevron-right" style="position: absolute; right: 45%;  transform: translateY(100%); color: black; font-size: 10px; pointer-events: none; opacity: 0.9;"></i>
-                    <button type="submit">Modifier</button>
-                </div>
-                <div th:if="${error}" th:text="${error}" class="error"></div>
-                <div th:if="${success}" th:text="${success}" class="success"></div>
-                <div th:if="${errors}" class="error-message">
-                    <ul th:if="${#lists.size(errors) > 1}">
-                        <li th:each="err : ${errors}" th:text="${err}"></li>
-                    </ul>
-                    <p th:if="${#lists.size(errors) == 1}" th:text="${errors[0]}"></p>
-                </div>
-            </div>
-
-
+            </form>
+        </div>
+        <form th:action="@{/profil/deposit}" method="post" class="form-deposit">
+            <label>
+                <input type="number" step="0.01" min="0.01" name="amount" placeholder="Montant à déposer" required />
+            </label>
+            <button type="submit">Déposer</button>
+            <div th:if="${successDeposit}" th:text="${successDeposit}" class="success"></div>
         </form>
-    </div>
+    </main>
 
 </body>
 </html>
