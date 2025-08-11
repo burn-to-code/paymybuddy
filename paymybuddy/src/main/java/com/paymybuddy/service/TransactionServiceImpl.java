@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -40,15 +41,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new TransactionBusinessException("Vous ne pouvez pas vous envoyer de l'argent à vous même");
         }
 
-        BigDecimal amount = transaction.getAmount();
-        BigDecimal account = userSender.getAccount();
-
-        if (account == null || amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new TransactionBusinessException("Le montant ou le solde est nul");
-        }
-        if (amount.compareTo(account) > 0) {
-            throw new TransactionBusinessException("Solde insuffisant : " + account + " € disponible, mais " + amount + " € demandé.");
-        }
+        BigDecimal amount = getBigDecimalAndVerifyIfTransactionIsOk(transaction, userSender);
 
         log.info("Montant valide");
 
@@ -81,6 +74,26 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     // Utilitaire pour transaction d'argent
+    private static BigDecimal getBigDecimalAndVerifyIfTransactionIsOk(TransactionRequest transaction, User userSender) {
+        BigDecimal amount = transaction.getAmount();
+        BigDecimal account = userSender.getAccount();
+
+        if (amount == null) {
+            throw new TransactionBusinessException("Le montant est obligatoire");
+        }
+
+        if (account == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new TransactionBusinessException("Le montant ou le solde est nul");
+        }
+        if (amount.compareTo(account) > 0) {
+            throw new TransactionBusinessException("Solde insuffisant : " + account + " € disponible, mais " + amount + " € demandé.");
+        }
+        if(amount.scale() > 2) {
+            amount = amount.setScale(2, RoundingMode.HALF_UP);
+        }
+        return amount;
+    }
+
     private void transferMoney(User sender, User receiver, BigDecimal amount) {
         BigDecimal newSenderAccount = sender.getAccount().subtract(amount);
         BigDecimal newReceiverAccount = receiver.getAccount().add(amount);
