@@ -5,10 +5,10 @@ import lombok.Data;
 
 @Data
 public class UpdateUserRequest {
-    @NotNull(message = "Un nom d'utilisateur esr requis")
+    @NotNull(message = "Un nom d'utilisateur est requis")
     private String username;
 
-    @NotNull(message = "Un email  est requis")
+    @NotNull(message = "Un email est requis")
     private String email;
 
     @NotNull(message = "Un mot de passe est requis")
