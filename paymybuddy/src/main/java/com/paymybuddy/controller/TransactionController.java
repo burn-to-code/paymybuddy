@@ -13,11 +13,12 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.beans.PropertyEditorSupport;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Slf4j
@@ -34,8 +35,22 @@ public class TransactionController {
         this.userService = userService;
     }
 
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(BigDecimal.class, new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) throws IllegalArgumentException {
+                try {
+                    setValue(new BigDecimal(text));
+                } catch (NumberFormatException e) {
+                    setValue(null);
+                }
+            }
+        });
+    }
+
     @GetMapping
-    public String showTransactionPage(Model model) {
+    public String showTransactionPage(Model model, RedirectAttributes redirectAttributes) {
         TransactionRequest request = new TransactionRequest();
         request.setUserReceiverId(0L);
 
@@ -48,7 +63,7 @@ public class TransactionController {
             transactions = transactionService.getTransactionByUserSenderId(connectedUser);
         } catch (Exception ex) {
             log.error("Une erreur est survenu lors de la récupération de l'user courant ou de ses transactions", ex);
-            model.addAttribute("error", ex.getMessage());
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
             return "redirect:/transferer";
         }
 
@@ -83,7 +98,7 @@ public class TransactionController {
             return "redirect:/transferer";
         }
 
-        model.addFlashAttribute("success", "transation effectuée avec succès");
+        model.addFlashAttribute("success", "transaction effectuée avec succès");
         return "redirect:/transferer";
     }
 }
