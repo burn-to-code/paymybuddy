@@ -2,21 +2,18 @@ package com.paymybuddy.model.DTO;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
 public class RegisterRequest {
 
-    @NotBlank(message = "UserName is required")
-    @NotEmpty(message = "UserName is required")
+    @NotBlank(message = "L'userName est requis")
     private String userName;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email address")
+    @NotBlank(message = "L'email est requis")
+    @Email(message = "L'email est invalide")
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @NotEmpty(message = "Password is required")
+    @NotBlank(message = "Le mot de passe est requis")
     private String password;
 }
