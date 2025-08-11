@@ -13,8 +13,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Controller
@@ -34,7 +36,7 @@ public class UpdateProfilController {
         return "profil";
     }
 
-    @PostMapping
+    @PostMapping("/update")
     public String updateProfil(@ModelAttribute("request") @Valid UpdateUserRequest request,
                                BindingResult bindingResult,
                                RedirectAttributes model) {
@@ -59,6 +61,22 @@ public class UpdateProfilController {
 
         log.info("Mis à jour du profil de l'utilisateur {}", connectedUser.getUsername() + " réussie");
         model.addFlashAttribute("success", "les modifications ont bien été enregistrés");
+        return "redirect:/profil";
+    }
+
+
+    @PostMapping("/deposit")
+    public String depositMoney(@RequestParam BigDecimal amount,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            userService.depositOnAccount(amount, SecurityUtils.getConnectedUser());
+        } catch (Exception ex) {
+            log.error("Erreur lors de la sauvegarde du profil", ex);
+            redirectAttributes.addFlashAttribute("error", ex.getMessage());
+            return "redirect:/profil";
+        }
+
+        redirectAttributes.addFlashAttribute("successDeposit", "Montant ajouté avec succès !");
         return "redirect:/profil";
     }
 }
