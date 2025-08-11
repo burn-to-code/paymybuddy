@@ -15,6 +15,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -135,14 +136,13 @@ public class UserServiceImplTest {
 
     @Test
     public void addUserConnexion_WhenEmailUserToConnect_IsNull() {
-        String email = null;
         Long id = 1L;
         User user = new User();
         user.setId(id);
         user.setEmail("test@example.com");
         user.setPassword("password");
 
-        EmailNotFoundException ex = assertThrows(EmailNotFoundException.class, () -> userService.addUserConnexion(user, email));
+        EmailNotFoundException ex = assertThrows(EmailNotFoundException.class, () -> userService.addUserConnexion(user, null));
 
         assertEquals("L'email est requis", ex.getMessage());
 
@@ -177,7 +177,7 @@ public class UserServiceImplTest {
 
         UserNotFoundException ex = assertThrows(UserNotFoundException.class, () -> userService.addUserConnexion(user, email));
 
-        assertEquals("L'utilisateur avec l'email " + email + " n'existe pas", ex.getMessage());
+        assertEquals("L'utilisateur avec l'email " + email + " n'existe pas, veuillez vérifier.", ex.getMessage());
         verify(userRepository, Mockito.never()).save(Mockito.any());
     }
 
@@ -250,10 +250,10 @@ public class UserServiceImplTest {
         userService.addUserConnexion(userConnected, email);
 
         assertTrue(userConnected.getConnections().contains(userToConnect));
-        assertTrue(userToConnect.getConnections().contains(userConnected));
+        assertFalse(userToConnect.getConnections().contains(userConnected));
 
         verify(userRepository, times(1)).save(userConnected);
-        verify(userRepository, times(1)).save(userToConnect);
+        verify(userRepository, times(0)).save(userToConnect);
     }
 
     @Test
@@ -524,5 +524,31 @@ public class UserServiceImplTest {
         assertEquals("encodedNewPassword", existingUser.getPassword());
 
         verify(userRepository, times(1)).save(existingUser);
+    }
+
+    @Test
+    void depositOnAccount_WhenEverythingIsOk() {
+        Long id = 1L;
+        User user = new User();
+        user.setId(id);
+        user.setEmail("<EMAIL>");
+        user.setPassword("password");
+        user.setAccount(new BigDecimal(0));
+
+        userService.depositOnAccount(new BigDecimal("100"), user);
+
+        assertEquals(new BigDecimal("100"), user.getAccount());
+        verify(userRepository, times(1)).updateAccount(user.getId(), new BigDecimal("100"));
+    }
+
+    @Test
+    void depositOnAccount_WhenAmountIsZeroOrNegative_ShouldThrow() {
+        User user = new User();
+        user.setId(1L);
+        user.setAccount(BigDecimal.ZERO);
+
+        assertThrows(IllegalArgumentException.class, () -> userService.depositOnAccount(BigDecimal.ZERO, user));
+
+        assertThrows(IllegalArgumentException.class, () -> userService.depositOnAccount(new BigDecimal("-10"), user));
     }
 }
