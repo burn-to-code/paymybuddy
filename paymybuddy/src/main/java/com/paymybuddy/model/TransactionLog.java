@@ -39,7 +39,6 @@ public class TransactionLog {
         if (commission == null || commission.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("La commission doit être supérieure à zéro");
         }
-        // Arrondi à 2 décimales, mode HALF_UP (classique en finance)
         this.commission = commission.setScale(2, RoundingMode.HALF_UP);
     }
 }
