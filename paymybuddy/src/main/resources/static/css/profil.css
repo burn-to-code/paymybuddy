@@ -9,6 +9,25 @@ body {
     font-family: 'Poppins', sans-serif;
 }
 
+
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #000;
+    color: #fff;
+    padding: 8px 16px;
+    z-index: 100;
+    text-decoration: none;
+    font-weight: bold;
+    transition: top 0.3s ease;
+}
+
+.skip-link:focus {
+    top: 0;
+    outline: 2px solid #fff;
+}
+
 .div-form-center{
     width: 100%;
     display: flex;
@@ -103,6 +122,55 @@ body {
 
 
 .input-label-with-button > button {
+    border-radius: 8px;
+    border: none;
+    background-color: #F69F1D;
+    color: white;
+    font-weight: bold;
+    font-size: 24px;
+    padding: 14px 24px;
+    gap: 8px;
+}
+
+.form-deposit {
+    width: 70%;
+    height: 300px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    gap: 16px;
+    margin: auto;
+}
+
+.form-deposit > label {
+    font-size: 20px;
+    font-weight: 500;
+    display: block;
+    width: 327px;
+    border: none;
+}
+
+.form-deposit > label > input {
+    font-size: 20px;
+    width: 327px;
+    border: none;
+    font-weight: 400;
+    height: 29px;
+}
+
+.form-deposit > label > input:focus {
+    outline: none;
+    border: 1px solid transparent;
+}
+
+.form-deposit > input::placeholder {
+    color: #000000;
+    font-weight: 400;
+}
+
+.form-deposit > button {
     border-radius: 8px;
     border: none;
     background-color: #F69F1D;
