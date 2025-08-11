@@ -30,7 +30,15 @@
 
     </div>
     <button type="submit">S'inscrire</button>
+    <!--/*@thymesVar id="error" type="error"*/-->
     <p th:if="${error}" th:text="${error}" style="color:red;"></p>
+    <!--/*@thymesVar id="errors" type="errors"*/-->
+    <div th:if="${errors}" class="error-message">
+      <ul th:if="${#lists.size(errors) > 1}">
+        <li th:each="err : ${errors}" th:text="${err}"></li>
+      </ul>
+      <p th:if="${#lists.size(errors) == 1}" th:text="${errors[0]}"></p>
+    </div>
   </form>
   <p><a th:href="@{/login}">Déjà inscrit ?</a></p>
 </div>
