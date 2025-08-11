@@ -10,6 +10,9 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -25,43 +28,46 @@ public class CustomOidcUserService extends OidcUserService {
         String username = OidcUser.getAttribute("name");
         String provider = request.getClientRegistration().getRegistrationId();
 
-        if (email == null || email.isBlank()) {
+        if (!StringUtils.hasText(email)) {
             throw new OAuth2AuthenticationException(new OAuth2Error("invalid_email"), "Email is required from OAuth2 provider");
         }
 
-        User existingUser = userRepository.findByEmail(email).orElse(null);
+        final User user = userRepository.findByEmail(email)
+                .orElse(createNewUser(email, username));
 
-        if (existingUser != null && existingUser.getProvider() == AuthProvider.LOCAL) {
-            throw new OAuth2AuthenticationException(new OAuth2Error("invalid_token"),
-                    "Un compte local existe déjà pour cet email. Veuillez vous connecter avec votre email et mot de passe.");
+        if (user.getProvider() == AuthProvider.LOCAL) {
+                throw new OAuth2AuthenticationException(new OAuth2Error("invalid_token"),
+                        "Un compte local existe déjà pour cet email. Veuillez vous connecter avec votre email et mot de passe.");
         }
 
+        user.setProvider(AuthProvider.valueOf(provider.toUpperCase()));
 
-        if(existingUser == null) {
-            existingUser = new User();
-            existingUser.setEmail(email);
-            existingUser.setUsername(generateUniqueUsername(username));
-            existingUser.setProvider(AuthProvider.valueOf(provider.toUpperCase()));
-            userRepository.save(existingUser);
-        } else {
-            existingUser.setProvider(AuthProvider.valueOf(provider.toUpperCase()));
-            userRepository.save(existingUser);
-        }
+        userRepository.save(user);
 
-        return new CustomOidcUser(OidcUser, existingUser);
+        return new CustomOidcUser(OidcUser, user);
     }
 
-    private String generateUniqueUsername(String base) {
-        String username = base;
-        int suffix = 0;
-
-        while (userRepository.findByUsername(username).isPresent()) {
-            suffix++;
-            username = base + suffix;
-        }
-        return username;
+    private User createNewUser(final String email, final String username) {
+        final User user = new User();
+        user.setEmail(email);
+        user.setUsername(generateUniqueUsername(username));
+        return user;
     }
 
+    private String generateUniqueUsername(final String username) {
+        final int min = 11;
+        final int max = 99;
+        final var random = new Random();
+        final double suffix = random.nextInt(max - min + 1) + min;
+
+        final String usernameSuffix = username + suffix;
+
+        if (userRepository.findByUsername(usernameSuffix).isEmpty()) {
+            return usernameSuffix;
+        }
+
+        return generateUniqueUsername(usernameSuffix);
+    }
 
 
 }
