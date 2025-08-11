@@ -3,6 +3,7 @@ package com.paymybuddy.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 @Entity
 @Data
 @Table(name = "users")
+@ToString(exclude = "connections")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,7 +39,4 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "connection_id"))
     private List<User> connections;
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<AccountOperation> accountOperations;
 }
