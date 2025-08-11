@@ -8,34 +8,38 @@
 
 </head>
 <body>
-    <div class="login-box">
-        <form th:action="@{/login}" method="post">
-            <h1>Pay My Buddy</h1>
-            <div th:if="success" style="color:green;" class="success-message">
-                <p th:text="${success}"></p>
-            </div>
-            <div class="info-box">
-                <label for="email"></label>
-                <input type="email" id="email" name="email" required placeholder="Mail"/>
-                <br/>
-                <label for="password"></label>
-                <input type="password" id="password" name="password" required placeholder="Mot de passe"/>
-                <br/>
-            </div>
-            <button type="submit">Se connecter</button>
+<a href="#main-content" class="skip-link">Passer au contenu principal</a>
+<main id="main-content" tabindex="-1">
+        <div class="login-box">
+            <form th:action="@{/login}" method="post">
+                <h1>Pay My Buddy</h1>
+                <div th:if="success" style="color:green;" class="success-message">
+                    <!--/*@thymesVar id="success" type="success"*/-->
+                    <p th:text="${success}"></p>
+                </div>
+                <div class="info-box">
+                    <label for="email"></label>
+                    <input type="email" id="email" name="email" required placeholder="Mail"/>
+                    <br/>
+                    <label for="password"></label>
+                    <input type="password" id="password" name="password" required placeholder="Mot de passe"/>
+                    <br/>
+                </div>
+                <button type="submit">Se connecter</button>
 
-            <div th:if="${param.error}" class="error">
-                <p th:if="${param.error}">Email ou mot de passe incorrect</p>
-                <p th:text="${param.error}">Erreur</p>
-            </div>
-        </form>
-        <a th:href="@{/oauth2/authorization/google}">
-            <button class="google-btn">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" class="google-icon" />
-                <span>Continuer avec Google</span>
-            </button>
-        </a>
-        <p><a th:href="@{/register}">Pas encore inscrit ?</a></p>
-    </div>
+                <div th:if="${param.error}" class="error">
+                    <p th:if="${param.error}">Email ou mot de passe incorrect</p>
+                    <p th:text="${param.error}">Erreur</p>
+                </div>
+            </form>
+            <a th:href="@{/oauth2/authorization/google}">
+                <button class="google-btn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google logo" class="google-icon" />
+                    <span>Continuer avec Google</span>
+                </button>
+            </a>
+            <p><a th:href="@{/register}">Pas encore inscrit ?</a></p>
+        </div>
+    </main>
 </body>
 </html>
