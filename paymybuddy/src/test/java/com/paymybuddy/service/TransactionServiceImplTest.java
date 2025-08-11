@@ -62,7 +62,7 @@ public class TransactionServiceImplTest {
         // When & Then
         TransactionBusinessException ex = assertThrows(TransactionBusinessException.class,
                 () -> transactionService.saveNewTransaction(request, sender));
-        assertEquals("Le montant ou le solde est nul", ex.getMessage());
+        assertEquals("Le montant est obligatoire", ex.getMessage());
 
         verify(transactionRepository, never()).save(any());
     }
@@ -140,7 +140,7 @@ public class TransactionServiceImplTest {
                 transactionService.saveNewTransaction(request, sender)
         );
 
-        assertEquals("Le montant ou le solde est nul", exception.getMessage());
+        assertEquals("Le montant est obligatoire", exception.getMessage());
     }
 
     @Test
