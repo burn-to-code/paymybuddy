@@ -9,61 +9,65 @@
 </head>
 <body>
     <div th:replace="~{fragments/header :: header}"></div>
+    <main id="main-content" tabindex="-1">
+        <section class="div-form-center" tabindex="0">
+            <form th:action="@{/transferer}" th:object="${request}" method="post" class="form-transfer">
+                <label for="userReceiverId" class="visually-hidden">Destinataires</label>
+                <select id="userReceiverId" th:field="*{userReceiverId}" required>
+                    <option value="0" disabled selected>Sélectionner un contact</option>
+                    <option th:each="contact : ${contacts}"
+                            th:value="${contact.id}"
+                            th:text="${contact.username}">
+                    </option>
+                </select>
 
-    <div class="div-form-center">
-        <form th:action="@{/transferer}" th:object="${request}" method="post" class="form-transfer">
+                <label>
+                    <input class="description" type="text" name="description" th:field="*{description}" placeholder="Description">
+                </label>
 
-            <select id="userReceiverId" th:field="*{userReceiverId}" required>
-                <option value="0" disabled selected>Sélectionner un contact</option>
-                <option th:each="contact : ${contacts}"
-                        th:value="${contact.id}"
-                        th:text="${contact.username}">
-                </option>
-            </select>
+                <label for="amount" class="visually-hidden">Montant</label>
+                <label>
+                    <input class="amount" type="number" id="amount" name="amount" th:field="*{amount}" placeholder="0€" required min="0.01" step="0.01">
+                </label>
 
-            <label>
-                <input class="description" type="text" name="description" th:field="*{description}" placeholder="Description">
-            </label>
+                <button type="submit">Payer</button>
+            </form>
+            <!--/*@thymesVar id="errors" type="errors"*/-->
+            <div th:if="${errors}" class="error-message">
+                <ul th:if="${#lists.size(errors) > 1}">
+                    <li th:each="err : ${errors}" th:text="${err}"></li>
+                </ul>
+                <p th:if="${#lists.size(errors) == 1}" th:text="${errors[0]}"></p>
+            </div>
+            <div th:if="${error}" class="error">
+                <p th:text="${error}"></p>
+            </div>
+            <!--/*@thymesVar id="success" type="success"*/-->
+            <div th:if="${success}" class="success">
+                <p th:text="${success}"></p>
+            </div>
+        </section>
 
-            <label>
-                <input class="amount" type="number" name="amount" th:field="*{amount}" placeholder="0€" required min="0.01" step="0.01">
-            </label>
-
-            <button type="submit">Payer</button>
-        </form>
-        <div th:if="${errors}" class="error-message">
-            <ul th:if="${#lists.size(errors) > 1}">
-                <li th:each="err : ${errors}" th:text="${err}"></li>
-            </ul>
-            <p th:if="${#lists.size(errors) == 1}" th:text="${errors[0]}"></p>
-        </div>
-        <div th:if="${error}" class="error">
-            <p th:text="${error}"></p>
-        </div>
-        <div th:if="${success}" class="success">
-            <p th:text="${success}"></p>
-        </div>
-    </div>
-
-    <div class="transactions-view">
-        <h2>Mes transactions</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>Destinataire</th>
-                <th>Description</th>
-                <th>Montant</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="transaction : ${transactions}">
-                <td th:text="${transaction.receiverName}">Destinataire</td>
-                <td th:text="${transaction.description}">Description</td>
-                <td th:text="${transaction.amount} + ' €'">Montant</td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+        <section class="transactions-view" tabindex="0">
+            <h2>Mes transactions</h2>
+            <table>
+                <thead>
+                <tr>
+                    <th>Destinataire</th>
+                    <th>Description</th>
+                    <th>Montant</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="transaction : ${transactions}">
+                    <td th:text="${transaction.receiverName}">Destinataire</td>
+                    <td th:text="${transaction.description}">Description</td>
+                    <td th:text="${transaction.amount} + ' €'">Montant</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
 
 
 </body>
