@@ -22,7 +22,7 @@ public class SecurityUtils {
         if (authentication != null) {
             Object principal = authentication.getPrincipal();
 
-            System.out.println("Principal class: " + principal.getClass().getName());
+            log.info("Principal class: {}", principal.getClass().getName());
             switch (principal) {
                 case User user -> {
                     log.debug("User '{}' is connected", user.getUsername());
