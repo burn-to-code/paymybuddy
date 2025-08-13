@@ -8,25 +8,26 @@
     <link rel="stylesheet" th:href="@{/css/ajouter-relation.css}">
 </head>
 <body>
-
+<a href="#main-content" class="skip-link">Passer au contenu principal</a>
   <div th:replace="~{fragments/header :: header}"></div>
+  <main role="main" class="main-content" id="main-content">
+        <div class="form-add-relation">
+        <form th:action="@{/ajouter-relation}" method="post" class="form-relation">
 
-  <div class="form-add-relation">
-    <form th:action="@{/ajouter-relation}" method="post" class="form-relation">
+          <div class="input-container">
+            <label for="email">Chercher une relation</label>
+            <!--/*@thymesVar id="email" type="email"*/-->
+            <input id="email" class="email" type="email" name="email" th:value="${email}" placeholder="Saisir une adresse mail" required>
+          </div>
 
-      <div class="input-container">
-        <label for="email">Chercher une relation</label>
-        <!--/*@thymesVar id="email" type="email"*/-->
-        <input id="email" class="email" type="email" name="email" th:value="${email}" placeholder="Saisir une adresse mail" required>
-      </div>
-
-      <button type="submit">Ajouter</button>
-    </form>
-      <!--/*@thymesVar id="error" type="error"*/-->
-      <div th:if="${error}" th:text="${error}" class="error"></div>
-      <!--/*@thymesVar id="success" type="success"*/-->
-      <div th:if="${success}" th:text="${success}" class="success"></div>
-  </div>
+          <button type="submit">Ajouter</button>
+        </form>
+          <!--/*@thymesVar id="error" type="error"*/-->
+          <div th:if="${error}" th:text="${error}" class="error"></div>
+          <!--/*@thymesVar id="success" type="success"*/-->
+          <div th:if="${success}" th:text="${success}" class="success"></div>
+        </div>
+  </main>
 
 </body>
 </html>

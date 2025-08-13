@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/header.css}">
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Passer au contenu principal</a>
     <div th:replace="~{fragments/header :: header}"></div>
     <main id="main-content" tabindex="-1">
         <section class="div-form-center" tabindex="0">
@@ -52,17 +53,17 @@
             <h2>Mes transactions</h2>
             <table>
                 <thead>
-                <tr>
-                    <th>Destinataire</th>
-                    <th>Description</th>
-                    <th>Montant</th>
+                <tr tabindex="0">
+                    <th tabindex="0">Destinataire</th>
+                    <th tabindex="0">Description</th>
+                    <th tabindex="0">Montant</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="transaction : ${transactions}">
-                    <td th:text="${transaction.receiverName}">Destinataire</td>
-                    <td th:text="${transaction.description}">Description</td>
-                    <td th:text="${transaction.amount} + ' €'">Montant</td>
+                <tr th:each="transaction : ${transactions}" tabindex="0">
+                    <td th:text="${transaction.receiverName}" tabindex="0">Destinataire</td>
+                    <td th:text="${transaction.description}" tabindex="0">Description</td>
+                    <td th:text="${transaction.amount} + ' €'" tabindex="0">Montant</td>
                 </tr>
                 </tbody>
             </table>

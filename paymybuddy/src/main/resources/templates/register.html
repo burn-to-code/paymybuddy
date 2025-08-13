@@ -8,39 +8,42 @@
 
 </head>
 <body>
-<div class="login-box">
-  <form th:action="@{/register}" th:object="${request}" method="post">
-    <h1>Pay My Buddy</h1>
-    <div class="info-box">
+<a href="#main-content" class="skip-link">Passer au contenu principal</a>
+<main id="main-content">
+    <div class="login-box">
+      <form th:action="@{/register}" th:object="${request}" method="post">
+        <h1>Pay My Buddy</h1>
+        <div class="info-box">
 
-      <label for="userName"></label>
-      <input type="text" id="userName" th:field="*{userName}" required placeholder="Username"/>
-      <div th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}"></div>
-      <br/>
+          <label for="userName"></label>
+          <input type="text" id="userName" th:field="*{userName}" required placeholder="Username"/>
+          <div th:if="${#fields.hasErrors('userName')}" th:errors="*{userName}"></div>
+          <br/>
 
-      <label for="email"></label>
-      <input type="email" id="email" th:field="*{email}" required placeholder="Mail"/>
-      <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-      <br/>
+          <label for="email"></label>
+          <input type="email" id="email" th:field="*{email}" required placeholder="Mail"/>
+          <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+          <br/>
 
-      <label for="password"></label>
-      <input type="password" id="password" th:field="*{password}" required placeholder="Mot de passe"/>
-      <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
-      <br/>
+          <label for="password"></label>
+          <input type="password" id="password" th:field="*{password}" required placeholder="Mot de passe"/>
+          <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+          <br/>
 
+        </div>
+        <button type="submit">S'inscrire</button>
+        <!--/*@thymesVar id="error" type="error"*/-->
+        <p th:if="${error}" th:text="${error}" style="color:red;"></p>
+        <!--/*@thymesVar id="errors" type="errors"*/-->
+        <div th:if="${errors}" class="error-message">
+          <ul th:if="${#lists.size(errors) > 1}">
+            <li th:each="err : ${errors}" th:text="${err}"></li>
+          </ul>
+          <p th:if="${#lists.size(errors) == 1}" th:text="${errors[0]}"></p>
+        </div>
+      </form>
+      <p><a th:href="@{/login}">Déjà inscrit ?</a></p>
     </div>
-    <button type="submit">S'inscrire</button>
-    <!--/*@thymesVar id="error" type="error"*/-->
-    <p th:if="${error}" th:text="${error}" style="color:red;"></p>
-    <!--/*@thymesVar id="errors" type="errors"*/-->
-    <div th:if="${errors}" class="error-message">
-      <ul th:if="${#lists.size(errors) > 1}">
-        <li th:each="err : ${errors}" th:text="${err}"></li>
-      </ul>
-      <p th:if="${#lists.size(errors) == 1}" th:text="${errors[0]}"></p>
-    </div>
-  </form>
-  <p><a th:href="@{/login}">Déjà inscrit ?</a></p>
-</div>
+</main>
 </body>
 </html>
