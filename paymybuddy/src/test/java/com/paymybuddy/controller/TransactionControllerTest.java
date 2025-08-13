@@ -48,14 +48,14 @@ class TransactionControllerTest {
     void showTransactionPage_shouldShowPageWithModel() throws Exception {
         User mockUser = new User();
         mockUser.setUsername("user1");
-        mockUser.setConnections(List.of(new User()));
 
+        List<User> mockConnections = List.of(new User());
         List<Transaction> mockTransactions = List.of(new Transaction());
 
         try (MockedStatic<SecurityUtils> mockedSecurity = Mockito.mockStatic(SecurityUtils.class)) {
             mockedSecurity.when(SecurityUtils::getConnectedUserId).thenReturn(1L);
 
-            when(userService.getCurrentUserById(1L)).thenReturn(mockUser);
+            when(userService.getListOfConnectionOfCurrentUserById(1L)).thenReturn(mockConnections);
             when(transactionService.getTransactionByUserSenderId(1L)).thenReturn(mockTransactions);
             when(transactionService.getTransactionDTOToShow(mockTransactions)).thenReturn(List.of());
 
@@ -73,7 +73,7 @@ class TransactionControllerTest {
         try (MockedStatic<SecurityUtils> mockedSecurity = Mockito.mockStatic(SecurityUtils.class)) {
             mockedSecurity.when(SecurityUtils::getConnectedUserId).thenReturn(1L);
 
-            when(userService.getCurrentUserById(1L)).thenThrow(new RuntimeException("fail"));
+            when(userService.getListOfConnectionOfCurrentUserById(1L)).thenThrow(new RuntimeException("fail"));
 
             mockMvc.perform(get("/transferer"))
                     .andExpect(status().is3xxRedirection())
@@ -81,6 +81,7 @@ class TransactionControllerTest {
                     .andExpect(flash().attributeExists("error"));
         }
     }
+
 
     @Test
     void processTransaction_shouldRedirectWithErrors_whenValidationFails() throws Exception {

@@ -15,12 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.connections WHERE u.id = :id")
-    Optional<User> findByIdWithConnections(Long id);
-
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.connections WHERE u.email = :email")
-    Optional<User> findByEmailWithConnections(String email);
-
     @Modifying
     @Query("UPDATE User u SET u.account = :account WHERE u.id = :id")
     void updateAccount(@Param("id") Long id, @Param("account") BigDecimal account);

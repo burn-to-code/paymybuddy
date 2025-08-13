@@ -103,36 +103,47 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void getCurrentUserById_WhenEmailExists() {
-        String email = "existing@email.com";
-        Long id = 1L;
+    public void getListOfConnectionOfCurrentUserById_WhenUserExists() {
+        Long userId = 1L;
         User user = new User();
-        user.setId(id);
-        user.setEmail(email);
-        when(userRepository.findByIdWithConnections(id)).thenReturn(Optional.of(user));
+        user.setId(userId);
+        user.setEmail("existing@email.com");
 
-        User currentUser = userService.getCurrentUserById(id);
+        User connection1 = new User();
+        connection1.setId(2L);
+        connection1.setEmail("conn1@email.com");
 
-        assertNotNull(currentUser);
-        assertEquals(1L, currentUser.getId());
-        assertEquals(email, currentUser.getEmail());
-        verify(userRepository).findByIdWithConnections(id);
+        User connection2 = new User();
+        connection2.setId(3L);
+        connection2.setEmail("conn2@email.com");
+
+        // Simuler la collection connections
+        List<User> connections = List.of(connection1, connection2);
+        user.setConnections(connections);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        List<User> resultConnections = userService.getListOfConnectionOfCurrentUserById(userId);
+
+        assertNotNull(resultConnections);
+        assertEquals(2, resultConnections.size());
+        assertEquals("conn1@email.com", resultConnections.get(0).getEmail());
+        assertEquals("conn2@email.com", resultConnections.get(1).getEmail());
+
+        verify(userRepository).findById(userId);
     }
 
     @Test
-    public void getCurrentUserById_WhenIdNotFound() {
-        // GIVEN
-        Long id = 1L;
-        when(userRepository.findByIdWithConnections(id)).thenReturn(Optional.empty());
+    public void getListOfConnectionOfCurrentUserById_WhenUserNotFound() {
+        Long userId = 1L;
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        //WHEN
-        UserNotFoundException ex = assertThrows(UserNotFoundException.class, () -> userService.getCurrentUserById(id));
+        UserNotFoundException ex = assertThrows(UserNotFoundException.class, () -> userService.getListOfConnectionOfCurrentUserById(userId));
 
-        // THEN
         assertEquals("Utilisateur introuvable avec l'id : 1", ex.getMessage());
-
-        verify(userRepository).findByIdWithConnections(id);
+        verify(userRepository).findById(userId);
     }
+
 
     @Test
     public void addUserConnexion_WhenEmailUserToConnect_IsNull() {
@@ -173,7 +184,7 @@ public class UserServiceImplTest {
         user.setEmail("<EMAIL>");
         user.setPassword("password");
 
-        when(userRepository.findByEmailWithConnections(email)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         UserNotFoundException ex = assertThrows(UserNotFoundException.class, () -> userService.addUserConnexion(user, email));
 
@@ -196,8 +207,8 @@ public class UserServiceImplTest {
         userToConnect.setEmail(email);
         userToConnect.setPassword("password");
 
-        when(userRepository.findByEmailWithConnections(email)).thenReturn(Optional.of(userToConnect));
-        when(userRepository.findByIdWithConnections(user.getId())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(userToConnect));
+        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
 
         UserNotFoundException ex = assertThrows(UserNotFoundException.class, () -> userService.addUserConnexion(user, email));
 
@@ -223,8 +234,8 @@ public class UserServiceImplTest {
         user.setPassword("password");
         user.setConnections(List.of(userToConnect));
 
-        when(userRepository.findByEmailWithConnections(email)).thenReturn(Optional.of(userToConnect));
-        when(userRepository.findByIdWithConnections(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(userToConnect));
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         EmailConflictException ex = assertThrows(EmailConflictException.class, () -> userService.addUserConnexion(user, email));
 
@@ -244,8 +255,8 @@ public class UserServiceImplTest {
         userToConnect.setEmail(email);
         userToConnect.setConnections(new ArrayList<>());
 
-        when(userRepository.findByEmailWithConnections(email)).thenReturn(Optional.of(userToConnect));
-        when(userRepository.findByIdWithConnections(userConnected.getId())).thenReturn(Optional.of(userConnected));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(userToConnect));
+        when(userRepository.findById(userConnected.getId())).thenReturn(Optional.of(userConnected));
 
         userService.addUserConnexion(userConnected, email);
 
@@ -535,10 +546,10 @@ public class UserServiceImplTest {
         user.setPassword("password");
         user.setAccount(new BigDecimal(0));
 
-        userService.depositOnAccount(new BigDecimal("100"), user);
+        userService.depositOnAccount(new BigDecimal("100.00"), user);
 
-        assertEquals(new BigDecimal("100"), user.getAccount());
-        verify(userRepository, times(1)).updateAccount(user.getId(), new BigDecimal("100"));
+        assertEquals(new BigDecimal("100.00"), user.getAccount());
+        verify(userRepository, times(1)).updateAccount(user.getId(), new BigDecimal("100.00"));
     }
 
     @Test

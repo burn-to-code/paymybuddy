@@ -5,12 +5,13 @@ import com.paymybuddy.model.DTO.UpdateUserRequest;
 import com.paymybuddy.model.User;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface UserService {
 
     void registerUser(RegisterRequest request);
 
-    User getCurrentUserById(Long userId);
+    List<User> getListOfConnectionOfCurrentUserById(Long userId);
 
     void addUserConnexion(User userConnected, String emailOfAnotherUser);
 

@@ -11,6 +11,7 @@ import com.paymybuddy.model.User;
 import com.paymybuddy.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -33,6 +35,13 @@ public class UserServiceImpl implements UserService {
     public static final Pattern EMAIL_REGEX = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
 
+    /**
+     *
+     * @param request un objet contenant seulement les informations nécessaires : Username, Email et Password
+     * Le nom d'utilisateur et l'email doivent être unique : non existant en base de donnée.
+     * Si un utilisateur OAuth tente de se crée un compte avec l'adresse e-mail du compte OAuth, il ne pourra plus se connecter par google ou facebook.
+     * Le DTO permet d'avoir un format d'email requis obligatoire : sinon c'est renvoyé en Binding Result
+     */
     @Override
     public void registerUser(RegisterRequest request) {
         log.info("Création utilisateur avec email {}", request.getEmail());
@@ -73,10 +82,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User getCurrentUserById(Long userId) {
+    public List<User> getListOfConnectionOfCurrentUserById(Long userId) {
         log.info("Récupération d'un utilisateur avec ses contacts avec l'id {}", userId);
-        return userRepository.findByIdWithConnections(userId)
+        User user = userRepository.findById(userId)
                  .orElseThrow(() -> new UserNotFoundException("Utilisateur introuvable avec l'id : " + userId));
+        Hibernate.initialize(user.getConnections());
+        return user.getConnections();
     }
 
     @Override
@@ -91,10 +102,10 @@ public class UserServiceImpl implements UserService {
         }
 
         log.info("Tentative de récupération de l'utilisateur avec l'email {} pour ajouter une connexion avec l'utilisateur {}", emailOfUserToConnect, userConnected.getEmail());
-        User userToConnect = userRepository.findByEmailWithConnections(emailOfUserToConnect)
+        User userToConnect = userRepository.findByEmail(emailOfUserToConnect)
                 .orElseThrow(() -> new UserNotFoundException("L'utilisateur avec l'email " + emailOfUserToConnect + " n'existe pas, veuillez vérifier."));
 
-        User userConnectedEntity = userRepository.findByIdWithConnections(userConnected.getId())
+        User userConnectedEntity = userRepository.findById(userConnected.getId())
                         .orElseThrow(() -> new UserNotFoundException("L'utilisateur avec l'id " + userConnected.getId() + " n'existe pas"));
 
         if(userConnectedEntity.getConnections().contains(userToConnect)) {

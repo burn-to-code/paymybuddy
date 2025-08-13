@@ -55,11 +55,11 @@ public class TransactionController {
         request.setUserReceiverId(0L);
 
         final Long connectedUser = SecurityUtils.getConnectedUserId();
-        User currentUser;
+        List<User> connections;
         List<Transaction> transactions;
 
         try {
-            currentUser = userService.getCurrentUserById(connectedUser);
+            connections = userService.getListOfConnectionOfCurrentUserById(connectedUser);
             transactions = transactionService.getTransactionByUserSenderId(connectedUser);
         } catch (Exception ex) {
             log.error("Une erreur est survenu lors de la récupération de l'user courant ou de ses transactions", ex);
@@ -68,7 +68,7 @@ public class TransactionController {
         }
 
         model.addAttribute("request", request);
-        model.addAttribute("contacts", currentUser.getConnections());
+        model.addAttribute("contacts", connections);
         model.addAttribute("transactions", transactionService.getTransactionDTOToShow(transactions));
 
         return "transferer";
