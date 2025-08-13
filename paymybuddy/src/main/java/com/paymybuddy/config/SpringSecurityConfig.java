@@ -14,6 +14,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * Configuration de Spring Security pour l'application PayMyBuddy.
+ *
+ * <p>
+ * Définit :
+ * <ul>
+ *     <li>la gestion de l'authentification par formulaire et OAuth2 (Google, etc.)</li>
+ *     <li>les pages publiques et les restrictions d'accès aux ressources</li>
+ *     <li>le chiffrement des mots de passe avec BCrypt</li>
+ * </ul>
+ * </p>
+ */
 @Configuration
 @EnableWebSecurity
 public class SpringSecurityConfig {
@@ -25,6 +37,19 @@ public class SpringSecurityConfig {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Configure la chaîne de filtres de sécurité HTTP.
+     *
+     * <p>
+     * Autorise certaines URLs publiques (CSS, JS, login, register) et exige une authentification pour toutes les autres.
+     * Configure le login par formulaire et OAuth2, avec gestion des succès et échec de connexion.
+     * </p>
+     *
+     * @param http HttpSecurity pour configurer la sécurité web
+     * @param customOidcUserService le service OIDC personnalisé pour récupérer les informations utilisateur OAuth2
+     * @return la chaîne de filtres de sécurité configurée
+     * @throws Exception si une erreur survient lors de la configuration
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOidcUserService customOidcUserService) throws Exception {
         http
@@ -47,14 +72,27 @@ public class SpringSecurityConfig {
                 )
             );
 
+
         return http.build();
     }
 
+    /**
+     * Bean pour le service OIDC personnalisé.
+     *
+     * @return un objet CustomOidcUserService
+     */
     @Bean
     public CustomOidcUserService customOAuth2UserService() {
         return new CustomOidcUserService(userRepository);
     }
 
+    /**
+     * Configure l'AuthenticationManager avec le UserDetailsService et le PasswordEncoder.
+     *
+     * @param http HttpSecurity utilisé pour récupérer l'AuthenticationManagerBuilder
+     * @return l'AuthenticationManager configuré
+     * @throws Exception si une erreur survient lors de la configuration
+     */
     @Bean
     public AuthenticationManager authManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder auth = http.getSharedObject(AuthenticationManagerBuilder.class);
@@ -62,6 +100,11 @@ public class SpringSecurityConfig {
         return auth.build();
     }
 
+    /**
+     * Bean pour le chiffrement des mots de passe.
+     *
+     * @return un PasswordEncoder utilisant BCrypt
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

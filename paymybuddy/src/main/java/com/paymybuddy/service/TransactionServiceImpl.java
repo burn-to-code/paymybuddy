@@ -16,6 +16,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+/**
+ * Service de gestion des transactions entre utilisateurs.
+ * Implémente les opérations pour récupérer, créer et transformer les transactions.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -24,12 +28,29 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Récupère toutes les transactions effectuées par un utilisateur donné.
+     *
+     * @param userId l'identifiant de l'utilisateur expéditeur
+     * @return la liste des transactions où l'utilisateur est l'expéditeur
+     */
     @Override
     public List<Transaction> getTransactionByUserSenderId(Long userId) {
         log.info("Récupération des transactions de l'utilisateur avec l'id {}", userId);
         return transactionRepository.findBySender_Id(userId);
     }
 
+    /**
+     * Sauvegarde une nouvelle transaction entre un utilisateur expéditeur et un utilisateur destinataire.
+     * Vérifie que :
+     * - le destinataire existe et n'est pas le même que l'expéditeur,
+     * - le montant est valide et ne dépasse pas le solde de l'expéditeur.
+     *
+     * @param transaction l'objet TransactionRequest contenant le destinataire, le montant et la description
+     * @param userSender  l'utilisateur expéditeur de la transaction
+     * @throws TransactionBusinessException si le destinataire est invalide, si le montant est incorrect
+     *                                      ou si le solde est insuffisant
+     */
     @Override
     @Transactional
     public void saveNewTransaction(TransactionRequest transaction, User userSender) {
@@ -62,6 +83,12 @@ public class TransactionServiceImpl implements TransactionService {
                 userSender.getEmail(), userReceiver.getEmail(), amount);
     }
 
+    /**
+     * Transforme une liste de Transaction en une liste de DTO pour affichage.
+     *
+     * @param transactions la liste de transactions à transformer
+     * @return la liste de ResponseTransactionDTO contenant : nom du destinataire, description et montant
+     */
     @Override
     public List<ResponseTransactionDTO> getTransactionDTOToShow(List<Transaction> transactions) {
         return transactions.stream()
@@ -74,6 +101,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     // Utilitaire pour transaction d'argent
+
     private static BigDecimal getBigDecimalAndVerifyIfTransactionIsOk(TransactionRequest transaction, User userSender) {
         BigDecimal amount = transaction.getAmount();
         BigDecimal account = userSender.getAccount();

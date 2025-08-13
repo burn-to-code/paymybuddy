@@ -24,6 +24,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+/**
+ * Service de gestion des utilisateurs.
+ * Implémente les opérations liées à l'enregistrement, la mise à jour,
+ * la gestion des connexions et des comptes utilisateurs.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -36,11 +41,12 @@ public class UserServiceImpl implements UserService {
 
 
     /**
+     * Enregistre un nouvel utilisateur.
      *
-     * @param request un objet contenant seulement les informations nécessaires : Username, Email et Password
-     * Le nom d'utilisateur et l'email doivent être unique : non existant en base de donnée.
-     * Si un utilisateur OAuth tente de se crée un compte avec l'adresse e-mail du compte OAuth, il ne pourra plus se connecter par google ou facebook.
-     * Le DTO permet d'avoir un format d'email requis obligatoire : sinon c'est renvoyé en Binding Result
+     * @param request DTO contenant les informations nécessaires : username, email et password
+     *                L'username et l'email doivent être uniques.
+     * @throws UsernameConflictException si le nom d'utilisateur est déjà utilisé
+     * @throws EmailConflictException    si l'email existe déjà pour un compte local
      */
     @Override
     public void registerUser(RegisterRequest request) {
@@ -58,17 +64,8 @@ public class UserServiceImpl implements UserService {
 
         if(userOpt.isPresent()) {
             User existingUser = userOpt.get();
-            if(existingUser.getProvider() == AuthProvider.LOCAL){
-                log.warn("L'utilisateur avec l'email {}, existe déjà.", request.getEmail());
-                throw new EmailConflictException("Email déjà utilisé");
-            } else {
-                log.info("Un utilisateur existe avec cet email via OAuth. Ajout des identifiants locaux.");
-                existingUser.setUsername(request.getUserName());
-                existingUser.setPassword(passwordEncoder.encode(request.getPassword()));
-                existingUser.setProvider(AuthProvider.LOCAL);
-                userRepository.save(existingUser);
-                return;
-            }
+            verifyProvider(existingUser, request);
+            return;
         }
 
         User user = new User();
@@ -80,6 +77,13 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    /**
+     * Récupère la liste des connexions (contacts) de l'utilisateur courant.
+     *
+     * @param userId l'identifiant de l'utilisateur
+     * @return la liste des utilisateurs connectés à l'utilisateur
+     * @throws UserNotFoundException si l'utilisateur avec l'id donné n'existe pas
+     */
     @Override
     @Transactional
     public List<User> getListOfConnectionOfCurrentUserById(Long userId) {
@@ -90,6 +94,15 @@ public class UserServiceImpl implements UserService {
         return user.getConnections();
     }
 
+    /**
+     * Ajoute une connexion entre l'utilisateur courant et un autre utilisateur identifié par son email.
+     *
+     * @param userConnected       l'utilisateur connecté
+     * @param emailOfUserToConnect l email de l'utilisateur à ajouter
+     * @throws EmailNotFoundException  si l'email fourni est vide ou null
+     * @throws EmailConflictException  si l'utilisateur essaie de s'ajouter lui-même ou si la connexion existe déjà
+     * @throws UserNotFoundException   si l'utilisateur à connecter n'existe pas
+     */
     @Override
     @Transactional
     public void addUserConnexion(User userConnected, String emailOfUserToConnect) {
@@ -118,6 +131,16 @@ public class UserServiceImpl implements UserService {
         userRepository.save(userConnectedEntity);
     }
 
+    /**
+     * Met à jour les informations d'un utilisateur.
+     *
+     * @param request DTO contenant les champs à mettre à jour (username, email, password)
+     * @param user    l'utilisateur à mettre à jour
+     * @throws IllegalArgumentException  si aucune donnée à mettre à jour ou si des données sont invalides
+     * @throws EmailConflictException    si l'email est déjà utilisé par un autre utilisateur
+     * @throws UsernameConflictException si le nom d'utilisateur est déjà utilisé par un autre utilisateur
+     * @throws UnsupportedOperationException si l'utilisateur est OAuth et tente de modifier email ou mot de passe
+     */
     @Override
     @Transactional
     public void updateUser(UpdateUserRequest request, User user) {
@@ -137,6 +160,30 @@ public class UserServiceImpl implements UserService {
             log.info("Mise à jour de l'utilisateur {} réussie", userConnected.getId());
         }
     }
+
+    /**
+     * Effectue un dépôt sur le compte de l'utilisateur.
+     *
+     * @param amount le montant à déposer, doit être positif
+     * @param user   l'utilisateur dont le compte est crédité
+     * @throws IllegalArgumentException si le montant est négatif ou nul
+     */
+    @Override
+    @Transactional
+    public void depositOnAccount(BigDecimal amount, User user) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("le montant doit être positif");
+        }
+
+        BigDecimal amountForDeposit = amount.setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal newAccount = amountForDeposit.add(user.getAccount());
+
+        user.setAccount(newAccount);
+        userRepository.updateAccount(user.getId(), newAccount);
+    }
+
+    // UTILITAIRES
 
     private void validateUpdateRequest(UpdateUserRequest request) {
         String email = request.getEmail();
@@ -220,18 +267,16 @@ public class UserServiceImpl implements UserService {
         return isUpdate;
     }
 
-    @Override
-    @Transactional
-    public void depositOnAccount(BigDecimal amount, User user) {
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("le montant doit être positif");
+    private void verifyProvider(User existingUser, RegisterRequest request) {
+        if(existingUser.getProvider() == AuthProvider.LOCAL){
+            log.warn("L'utilisateur avec l'email {}, existe déjà.", request.getEmail());
+            throw new EmailConflictException("Email déjà utilisé");
+        } else {
+            log.info("Un utilisateur existe avec cet email via OAuth. Ajout des identifiants locaux.");
+            existingUser.setUsername(request.getUserName());
+            existingUser.setPassword(passwordEncoder.encode(request.getPassword()));
+            existingUser.setProvider(AuthProvider.LOCAL);
+            userRepository.save(existingUser);
         }
-
-        BigDecimal amountForDeposit = amount.setScale(2, RoundingMode.HALF_UP);
-
-        BigDecimal newAccount = amountForDeposit.add(user.getAccount());
-
-        user.setAccount(newAccount);
-        userRepository.updateAccount(user.getId(), newAccount);
     }
 }
