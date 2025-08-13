@@ -142,6 +142,13 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.10</version>
+                <configuration>
+                    <excludes>
+                        <exclude>com/paymybuddy/model/**</exclude>
+                        <exclude>com/paymybuddy/exception/**</exclude>
+                        <exclude>com/paymybuddy/config/**</exclude>
+                    </excludes>
+                </configuration>
 				<executions>
 					<execution>
 						<goals>
