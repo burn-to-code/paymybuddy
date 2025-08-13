@@ -10,6 +10,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
@@ -286,6 +287,25 @@ public class TransactionControllerIT {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/transferer"))
                 .andExpect(flash().attribute("errors", hasItem("Le montant dois contenir au maximum 2 décimales")));
+    }
+
+    @Test
+    void ShouldRejectTransactionBecauseTheSessionIsExpired() throws Exception {
+        UserDetailsImpl userDetails = new UserDetailsImpl(userSender);
+
+       MockHttpSession session = (MockHttpSession) mockMvc.perform(get("/transferer")
+                        .with(user(userDetails)))
+                        .andReturn()
+                        .getRequest()
+                        .getSession();
+
+        Assertions.assertNotNull(session);
+        session.invalidate();
+
+        mockMvc.perform(get("/transferer")
+                        .session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("**/login"));
     }
 
 
