@@ -111,7 +111,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new TransactionBusinessException("Le montant ou le solde ne doivent pas être inférieur à 0");
+            throw new TransactionBusinessException("Le montant ne doit pas être inférieur à 0");
         }
         if (amount.compareTo(account) > 0) {
             throw new TransactionBusinessException("Solde insuffisant : " + account + " € disponible, mais " + amount + " € demandé.");
