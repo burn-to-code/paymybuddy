@@ -227,9 +227,7 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("le montant doit être positif");
         }
 
-        BigDecimal amountForDeposit = amount.scale() > 2
-                ? amount.setScale(2, RoundingMode.HALF_UP)
-                : amount;
+        BigDecimal amountForDeposit = amount.setScale(2, RoundingMode.HALF_UP);
 
         BigDecimal newAccount = amountForDeposit.add(user.getAccount());
 

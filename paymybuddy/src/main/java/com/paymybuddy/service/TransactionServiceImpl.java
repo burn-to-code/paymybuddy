@@ -82,15 +82,15 @@ public class TransactionServiceImpl implements TransactionService {
             throw new TransactionBusinessException("Le montant est obligatoire");
         }
 
-        if (account == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new TransactionBusinessException("Le montant ou le solde est nul");
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new TransactionBusinessException("Le montant ou le solde ne doivent pas être inférieur à 0");
         }
         if (amount.compareTo(account) > 0) {
             throw new TransactionBusinessException("Solde insuffisant : " + account + " € disponible, mais " + amount + " € demandé.");
         }
-        if(amount.scale() > 2) {
-            amount = amount.setScale(2, RoundingMode.HALF_UP);
-        }
+
+        amount = amount.setScale(2, RoundingMode.HALF_UP);
+
         return amount;
     }
 

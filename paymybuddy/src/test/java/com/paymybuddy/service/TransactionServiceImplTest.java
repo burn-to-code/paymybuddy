@@ -105,10 +105,10 @@ public class TransactionServiceImplTest {
     void saveNewTransaction_ShouldSave_WhenValidRequest() {
         // Given
         User sender = createUser(1L, "sender@example.com", "Sender");
-        sender.setAccount(BigDecimal.valueOf(100.0));
+        sender.setAccount(BigDecimal.valueOf(100.00));
         User receiver = createUser(2L, "receiver@example.com", "Receiver");
-        receiver.setAccount(BigDecimal.valueOf(100.0));
-        TransactionRequest request = createTransactionRequest(2L, BigDecimal.valueOf(50.0), "Paiement");
+        receiver.setAccount(BigDecimal.valueOf(100.00));
+        TransactionRequest request = createTransactionRequest(2L, BigDecimal.valueOf(50.00), "Paiement");
 
         when(userRepository.findById(2L)).thenReturn(Optional.of(receiver));
         // When
@@ -120,13 +120,13 @@ public class TransactionServiceImplTest {
         Transaction savedTransaction = captor.getValue();
 
         assertEquals("Paiement", savedTransaction.getDescription());
-        assertEquals(BigDecimal.valueOf(50.0), savedTransaction.getAmount());
+        assertEquals(new BigDecimal("50.0"), savedTransaction.getAmount());
         assertEquals(sender, savedTransaction.getSender());
         assertEquals(receiver, savedTransaction.getReceiver());
 
 
-        verify(userRepository).updateAccount(sender.getId(), BigDecimal.valueOf(50.0));   // 100 - 50
-        verify(userRepository).updateAccount(receiver.getId(), BigDecimal.valueOf(150.0)); // 100 + 50
+        verify(userRepository).updateAccount(sender.getId(), new BigDecimal("50.00"));   // 100 - 50
+        verify(userRepository).updateAccount(receiver.getId(), new BigDecimal("150.00")); // 100 + 50
     }
 
     @Test
