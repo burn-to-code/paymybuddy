@@ -53,7 +53,7 @@ public class CustomOidcUserService extends OidcUserService {
         }
 
         final User user = userRepository.findByEmail(email)
-                .orElse(createNewUser(email, username));
+                .orElse(createNewUser(email, username, provider));
 
         if (user.getProvider() == AuthProvider.LOCAL) {
                 throw new OAuth2AuthenticationException(new OAuth2Error("invalid_token"),
@@ -74,10 +74,11 @@ public class CustomOidcUserService extends OidcUserService {
      * @param username le nom d'utilisateur proposé
      * @return le nouvel utilisateur créé
      */
-    private User createNewUser(final String email, final String username) {
+    private User createNewUser(final String email, final String username, final String provider) {
         final User user = new User();
         user.setEmail(email);
         user.setUsername(generateUniqueUsername(username));
+        user.setProvider(AuthProvider.valueOf(provider.toUpperCase()));
         return user;
     }
 
@@ -92,7 +93,7 @@ public class CustomOidcUserService extends OidcUserService {
         final int min = 11;
         final int max = 99;
         final var random = new Random();
-        final double suffix = random.nextInt(max - min + 1) + min;
+        final int suffix = random.nextInt(max - min + 1) + min;
 
         final String usernameSuffix = username + suffix;
 
