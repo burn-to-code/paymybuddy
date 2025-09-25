@@ -40,6 +40,13 @@ public class UserServiceImpl implements UserService {
     public static final Pattern EMAIL_REGEX = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
 
+    public BigDecimal getAccountById(Long userId) {
+        Assert.notNull(userId, "L'identifiant de l'utilisateur est requis");
+        return userRepository.findById(userId)
+                .map(User::getAccount)
+                .orElseThrow(() -> new UserNotFoundException("L'utilisateur avec l'id " + userId + " n'existe pas"));
+    }
+
     /**
      * Enregistre un nouvel utilisateur.
      *

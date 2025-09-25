@@ -10,6 +10,9 @@
 <body>
     <a href="#main-content" class="skip-link">Passer au contenu principal</a>
     <div th:replace="~{fragments/header :: header}"></div>
+    <div class="solder-container">
+        <p>Solde actuel : <span th:text="${solde}">0</span> €</p>
+    </div>
     <main id="main-content" tabindex="-1">
         <section class="div-form-center" tabindex="0">
             <form th:action="@{/transferer}" th:object="${request}" method="post" class="form-transfer">

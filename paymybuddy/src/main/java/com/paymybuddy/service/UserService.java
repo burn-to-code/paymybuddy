@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface UserService {
 
+    BigDecimal getAccountById(Long userId);
+
     void registerUser(RegisterRequest request);
 
     List<User> getListOfConnectionOfCurrentUserById(Long userId);

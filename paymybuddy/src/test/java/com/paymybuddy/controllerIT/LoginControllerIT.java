@@ -15,16 +15,22 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -179,6 +185,7 @@ public class LoginControllerIT {
     }
 
     @Test
+    @WithMockUser
     void shouldRedirectAuthenticatedUserFromLoginPage() throws Exception {
         User mockUser = new User();
         mockUser.setId(1L);
@@ -201,6 +208,34 @@ public class LoginControllerIT {
     @WithAnonymousUser
     void shouldAllowAccessToStaticResources() throws Exception {
         mockMvc.perform(get("/css/login.css"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void UserLoginTest() throws Exception {
+        mockMvc.perform(formLogin("/login")
+                .user("email", goodEmail)
+                .password("password", goodPassword))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/transferer"))
+                .andExpect(authenticated().withUsername(goodEmail));
+    }
+
+    @Test
+    void rejectUserLoginWithBadPassword() throws Exception {
+        mockMvc.perform(formLogin("/login")
+                .user("email", goodEmail)
+                .password("password", "wrongPassword"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login?error"));
+    }
+
+    @Test
+    @WithUserDetails(value = goodEmail, setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    void shouldAllowAccessForUserConnected() throws Exception {
+        mockMvc.perform(get("/transferer")
+                        .with(csrf()))
+                .andDo(print())
                 .andExpect(status().isOk());
     }
 }

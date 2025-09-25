@@ -27,6 +27,19 @@ body {
     outline: 2px solid #fff;
 }
 
+.solder-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.solder-container > p {
+    font-size: 24px;
+    font-weight: bold;
+}
+
 .div-form-center {
     width: 100%;
     display: flex;

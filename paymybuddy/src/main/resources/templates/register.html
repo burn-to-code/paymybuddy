@@ -24,9 +24,12 @@
           <input type="email" id="email" th:field="*{email}" required placeholder="Mail"/>
           <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
           <br/>
-
-          <label for="password"></label>
-          <input type="password" id="password" th:field="*{password}" required placeholder="Mot de passe"/>
+            <div class="wrapper_password">
+              <label for="password"></label>
+              <input type="password" id="password" th:field="*{password}" pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}"
+                     title="Doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre" required placeholder="Mot de passe"/>
+                <span class="toggle-password closed" id="togglePassword">👁</span>
+            </div>
           <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
           <br/>
 
@@ -45,5 +48,21 @@
       <p><a th:href="@{/login}">Déjà inscrit ?</a></p>
     </div>
 </main>
+
+<script>
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.getElementById('togglePassword');
+    togglePassword.classList.remove('closed');
+
+    togglePassword.addEventListener('click', () => {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            togglePassword.classList.add('closed'); // œil ouvert
+        } else {
+            passwordInput.type = 'password';
+            togglePassword.classList.remove('closed');    // œil fermé
+        }
+    });
+</script>
 </body>
 </html>

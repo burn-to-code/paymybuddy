@@ -57,10 +57,12 @@ public class TransactionController {
         final Long connectedUser = SecurityUtils.getConnectedUserId();
         List<User> connections;
         List<Transaction> transactions;
+        BigDecimal solde;
 
         try {
             connections = userService.getListOfConnectionOfCurrentUserById(connectedUser);
             transactions = transactionService.getTransactionByUserSenderId(connectedUser);
+            solde = userService.getAccountById(connectedUser);
         } catch (Exception ex) {
             log.error("Une erreur est survenu lors de la récupération de l'user courant ou de ses transactions", ex);
             redirectAttributes.addFlashAttribute("error", ex.getMessage());
@@ -68,6 +70,7 @@ public class TransactionController {
         }
 
         model.addAttribute("request", request);
+        model.addAttribute("solde", solde);
         model.addAttribute("contacts", connections);
         model.addAttribute("transactions", transactionService.getTransactionDTOToShow(transactions));
 
