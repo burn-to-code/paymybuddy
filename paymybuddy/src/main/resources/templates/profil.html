@@ -29,8 +29,11 @@
 
                     <div class="input-label-with-button">
                         <label for="password">Mot de passe</label>
-                        <input type="password" id="password" name="password" th:field="*{password}" placeholder="mot de passe">
+                        <input type="password" id="password" name="password" pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}"
+                               title="Doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre"
+                               th:field="*{password}" placeholder="mot de passe">
                         <i class="fa-solid fa-chevron-right" style="position: absolute; right: 45%;  transform: translateY(100%); color: black; font-size: 10px; pointer-events: none; opacity: 0.9;"></i>
+                        <span class="toggle-password closed" id="togglePassword">👁</span>
                         <button type="submit">Modifier</button>
                     </div>
                     <!--/*@thymesVar id="error" type="error"*/-->
@@ -56,6 +59,22 @@
             <div th:if="${successDeposit}" th:text="${successDeposit}" class="success"></div>
         </form>
     </main>
+
+    <script>
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+        togglePassword.classList.remove('closed');
+
+        togglePassword.addEventListener('click', () => {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                togglePassword.classList.add('closed'); // œil ouvert
+            } else {
+                passwordInput.type = 'password';
+                togglePassword.classList.remove('closed');    // œil fermé
+            }
+        });
+    </script>
 
 </body>
 </html>

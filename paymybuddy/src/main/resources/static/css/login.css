@@ -49,13 +49,14 @@ form {
     flex-direction: column;
     align-items: center;
     width: 295px;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 10px;
+    padding-bottom: 30px;
     height: 250px;
 }
 
 form input {
     width: 100%;
-    height: 40px;
     border-radius: 5px;
     padding: 15px 10px 15px 10px;
     font-size: 24px;
@@ -112,6 +113,15 @@ form button:hover {
     text-align: center;
 }
 
+.error p {
+    color: white;
+    font-size: 16px;
+    background-color: red;
+    padding: 10px 20px;
+    border-radius: 16px;
+    text-align: center;
+}
+
 .success {
     color: white;
     font-size: 16px;
@@ -149,4 +159,44 @@ form button:hover {
 .google-icon {
     height: 20px;
     width: 20px;
+}
+
+.wrapper_password {
+    position: relative;
+    height: 60.4px;
+    width: 318.2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wrapper_password input {
+    height: 27.2px
+}
+
+
+.wrapper_password input {
+    padding-right: 30px;
+}
+
+.wrapper_password .toggle-password {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none;
+    font-size: 18px;
+}
+
+.toggle-password.closed::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: black;
+    top: 45%;
+    left: 0;
+    transform: rotate(45deg); /* trait diagonal */
+    transform-origin: center;
 }
